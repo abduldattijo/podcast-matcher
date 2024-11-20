@@ -26,12 +26,11 @@ def create_app():
     #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://podcast_db_n1bc_user:sKSceAGVCbVYN4QH4rWIi6CxdEqMFnUC@dpg-csuvrkd6l47c7383de6g-a/podcast_db_n1bc'
+   
+    
+    
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
-    
-    #app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-    #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
      
     #railway production database
     #DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:axrjuGyXsVBvXDSxkKZVtpqAseqwPcTE@junction.proxy.rlwy.net:44492/railway")
