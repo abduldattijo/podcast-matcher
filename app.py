@@ -21,8 +21,8 @@ def create_app():
     app = Flask(__name__)
 
     # Database configuration
-    #render production database
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'postgresql://podcast_db_n1bc_user:sKSceAGVCbVYN4QH4rWIi6CxdEqMFnUC@dpg-csuvrkd6l47c7383de6g-a/podcast_db_n1bc')
+    # Database railway configuration
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:axrjuGyXsVBvXDSxkKZVtpqAseqwPcTE@postgres.railway.internal:5432/railway'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
      
     #railway production database
