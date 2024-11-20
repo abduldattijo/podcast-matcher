@@ -22,8 +22,8 @@ def create_app():
 
     # Database configuration
     # Database railway configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:axrjuGyXsVBvXDSxkKZVtpqAseqwPcTE@postgres.railway.internal:5432/railway'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    #app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:axrjuGyXsVBvXDSxkKZVtpqAseqwPcTE@postgres.railway.internal:5432/railway'
+    #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
