@@ -20,10 +20,3 @@ python-dotenv
 
 
 
-
-git config --global user.email "abduldattijo1@gmail.com.com"
-git config --global user.name "abduldattijo"
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git push origin main
