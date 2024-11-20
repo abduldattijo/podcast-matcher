@@ -35,8 +35,8 @@ def create_app():
     app.secret_key = 'your_secret_key'  
 
     # Configure upload folder  
-    app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    #app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
+    #os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
     # Check if database exists, if not create it
     if not database_exists(DATABASE_URI):
