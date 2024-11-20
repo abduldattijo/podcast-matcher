@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: my-flask-app
+    name: podcast-matcher
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn -b 0.0.0.0:$PORT app:app
+    startCommand: gunicorn app:app
     envVars:
       - key: DATABASE_URL
         value: postgresql://podcast_db_n1bc_user:sKSceAGVCbVYN4QH4rWIi6CxdEqMFnUC@dpg-csuvrkd6l47c7383de6g-a/podcast_db_n1bc
