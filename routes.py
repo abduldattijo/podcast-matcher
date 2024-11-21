@@ -12,6 +12,19 @@ from database import supabase
 
 logger = logging.getLogger(__name__)
 
+def parse_embedding_string(embedding_str):
+    try:
+        if isinstance(embedding_str, list):
+            return embedding_str
+        if isinstance(embedding_str, str):
+            # Remove brackets and split string into list of numbers
+            embedding_str = embedding_str.strip('[]')
+            return [float(x.strip()) for x in embedding_str.split(',')]
+        return None
+    except Exception as e:
+        logger.error(f"Error parsing embedding: {str(e)}")
+        return None
+
 def init_routes(app):
     @app.route('/')
     def index():
@@ -45,7 +58,6 @@ def init_routes(app):
             if client_id == 'new':
                 client_name = request.form.get("newClientNameInput")
                 if client_name:
-                    # Insert new client to Supabase
                     response = supabase.table('clients').insert({
                         "name": client_name
                     }).execute()
@@ -85,14 +97,14 @@ def init_routes(app):
                         transcription = f"Error processing file: {str(e)}"
 
                     embedding = create_embedding(transcription)
-
-                    # Insert client data to Supabase
-                    supabase.table('client_data').insert({
-                        "client_id": client_id,
-                        "filename": filename[:500],
-                        "transcription": transcription,
-                        "embedding": embedding
-                    }).execute()
+                    if embedding is not None:
+                        embedding_list = embedding.tolist() if isinstance(embedding, np.ndarray) else embedding
+                        supabase.table('client_data').insert({
+                            "client_id": client_id,
+                            "filename": filename[:500],
+                            "transcription": transcription,
+                            "embedding": str(embedding_list)
+                        }).execute()
 
             flash("Client data uploaded successfully.")
             return redirect(url_for('upload_combined'))
@@ -101,11 +113,17 @@ def init_routes(app):
             logger.error(f"Error in upload_client: {str(e)}")
             flash(f"Error uploading client data: {str(e)}")
             return redirect(url_for('upload_combined'))
-
+        
+        
+    
+    
+    
+    
+    
     @app.route('/upload_podcast', methods=['POST'])
     def upload_podcast():
         try:
-            from scripts.main import process_podcast
+            from main import process_podcast
 
             client_id = request.form.get("client_id")
             if not client_id:
@@ -157,7 +175,7 @@ def init_routes(app):
                                 "client_id": client_id,
                                 "search_term": row['Search Term'][:100],
                                 "listennotes_url": row['ListenNotes URL'][:255],
-                                "listen_score": row['ListenScore'],
+                                "listen_score": int(row['ListenScore']),
                                 "global_rank": float(row['Global Rank'].strip('%')) / 100,
                                 "rss_feed": row['RSS Feed'][:255],
                                 "status": "New"
@@ -207,8 +225,15 @@ def init_routes(app):
             if not client_data.data:
                 return jsonify({"error": "No client data found."}), 400
 
-            # Filter valid embeddings
-            valid_client_files = [data for data in client_data.data if data['embedding']]
+            # Parse embeddings from strings to float arrays
+            valid_client_files = []
+            for data in client_data.data:
+                if data.get('embedding'):
+                    embedding = parse_embedding_string(data['embedding'])
+                    if embedding:
+                        data['embedding'] = embedding
+                        valid_client_files.append(data)
+
             if not valid_client_files:
                 return jsonify({"error": "No valid client embeddings found."}), 400
             
@@ -223,17 +248,33 @@ def init_routes(app):
             if not podcasts.data:
                 return jsonify({"error": "No podcasts found."}), 400
 
-            valid_podcasts = [p for p in podcasts.data if p['embedding']]
+            valid_podcasts = []
+            for p in podcasts.data:
+                if p.get('embedding'):
+                    embedding = parse_embedding_string(p['embedding'])
+                    if embedding:
+                        p['embedding'] = embedding
+                        valid_podcasts.append(p)
+
             if not valid_podcasts:
                 return jsonify({"error": "No valid podcast embeddings found."}), 400
 
+            podcast_embeddings = np.array([p['embedding'] for p in valid_podcasts])
+
             # Get episodes from Supabase
+            episode_ids = [p['id'] for p in valid_podcasts]
             episodes = supabase.table('episodes')\
                 .select('*')\
-                .in_('podcast_id', [p['id'] for p in valid_podcasts])\
+                .in_('podcast_id', episode_ids)\
                 .execute()
 
-            valid_episodes = [e for e in episodes.data if e['embedding']]
+            valid_episodes = []
+            for e in episodes.data:
+                if e.get('embedding'):
+                    embedding = parse_embedding_string(e['embedding'])
+                    if embedding:
+                        e['embedding'] = embedding
+                        valid_episodes.append(e)
 
             final_scores = []
             for podcast in valid_podcasts:
@@ -241,21 +282,14 @@ def init_routes(app):
                 podcast_episodes = [e for e in valid_episodes if e['podcast_id'] == podcast['id']]
                 
                 # Calculate relevance score
-                if podcast['embedding']:
-                    podcast_embedding = np.array(podcast['embedding'])
-                    relevance_scores = cosine_similarity([podcast_embedding], client_embeddings)
-                    relevance_score = float(relevance_scores.mean()) * 100
-                else:
-                    relevance_score = 0.0
+                relevance_scores = cosine_similarity([podcast['embedding']], client_embeddings)
+                relevance_score = float(relevance_scores.mean()) * 100
 
                 # Calculate guest fit score
                 if podcast_episodes:
-                    episode_embeddings = np.array([e['embedding'] for e in podcast_episodes if e['embedding']])
-                    if episode_embeddings.size > 0:
-                        episode_scores = cosine_similarity(client_embeddings, episode_embeddings)
-                        guest_fit_score = float(episode_scores.mean()) * 100
-                    else:
-                        guest_fit_score = 0.0
+                    episode_embeddings = np.array([e['embedding'] for e in podcast_episodes])
+                    episode_scores = cosine_similarity(client_embeddings, episode_embeddings)
+                    guest_fit_score = float(episode_scores.mean()) * 100
                 else:
                     guest_fit_score = 0.0
 
@@ -266,7 +300,7 @@ def init_routes(app):
                 host_interest_score = 100.0 * (1 - podcast['global_rank'])
 
                 # Calculate recency score
-                if podcast['last_updated']:
+                if podcast.get('last_updated'):
                     from datetime import datetime
                     last_update = datetime.strptime(podcast['last_updated'], '%m-%d-%Y')
                     days_difference = (datetime.now() - last_update).days
@@ -300,10 +334,11 @@ def init_routes(app):
                     host_interest_score * weights['host_interest']
                 )
 
-                # Generate reason and mismatch explanation
+                # Generate explanations
                 reasons = []
                 mismatches = []
 
+                # Relevance explanation
                 if relevance_score >= 90:
                     reasons.append("Exceptional content match")
                 elif relevance_score >= 75:
@@ -314,6 +349,7 @@ def init_routes(app):
                     reasons.append("Moderate content match")
                     mismatches.append("Content alignment could be stronger")
 
+                # Audience explanation
                 if audience_score >= 90:
                     reasons.append("Exceptional listener engagement")
                 elif audience_score >= 75:
@@ -324,6 +360,7 @@ def init_routes(app):
                     reasons.append("Moderate audience reach")
                     mismatches.append("Limited audience reach")
 
+                # Recency explanation
                 if recency_score >= 90:
                     reasons.append("Very actively publishing")
                 elif recency_score >= 75:
@@ -336,6 +373,17 @@ def init_routes(app):
 
                 if podcast.get('categories'):
                     reasons.append(f"Topics: {podcast['categories']}")
+
+                logger.info(f"""
+                Podcast: {podcast['title']}
+                Detailed Scores:
+                - Relevance: {relevance_score:.1f}
+                - Audience: {audience_score:.1f}
+                - Guest Fit: {guest_fit_score:.1f}
+                - Recency: {recency_score:.1f}
+                - Host Interest: {host_interest_score:.1f}
+                - Aggregate: {aggregate_score:.1f}
+                """)
 
                 final_scores.append({
                     "podcast_name": podcast['title'] or f"Podcast {podcast['id']}",
@@ -357,4 +405,4 @@ def init_routes(app):
             logger.error(f"Error in match_podcasts: {str(e)}")
             return jsonify({"error": f"An error occurred during matching: {str(e)}"}), 500
 
-    return app
+    return app    
