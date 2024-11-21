@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, render_template
 import os
 import logging
@@ -8,8 +7,10 @@ from routes import init_routes
 from database import supabase
 
 # Set up logging
-logging.basicConfig(level=logging.INFO,
-                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # Load environment variables
@@ -22,7 +23,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 app = Flask(__name__)
 
 # Basic configuration
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key')
 
 # Configure upload folder for files
@@ -40,10 +40,13 @@ try:
 except Exception as e:
     logger.error(f"Error connecting to Supabase: {str(e)}")
 
-# Test route
+# Health check route
 @app.route('/health')
 def health_check():
-    return "OK", 200
+    return {
+        "status": "healthy",
+        "supabase_connected": True if response else False
+    }
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 10000))

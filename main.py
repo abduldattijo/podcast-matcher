@@ -4,8 +4,8 @@ import requests
 from datetime import datetime
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
-from utils import create_embedding
 import logging
+from utils import create_embedding
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +24,10 @@ def convert_date(date_str):
     formatted_date = date_obj.strftime("%m/%d/%y")
     return formatted_date
 
-def process_podcast(podcast, db, Episode):
+def process_podcast(podcast, supabase):
     try:
         title = ''
-        listennotes_url = f'ListenNotes URL: {podcast.listennotes_url}'
+        listennotes_url = f'ListenNotes URL: {podcast["listennotes_url"]}'
         contact_name = ''
         contact_email = ''
         description = ''
@@ -39,7 +39,7 @@ def process_podcast(podcast, db, Episode):
             "User-Agent": user_agent
         }
 
-        res = requests.get(url=podcast.rss_feed, headers=headers)
+        res = requests.get(url=podcast['rss_feed'], headers=headers)
         soup = BeautifulSoup(res.text, 'xml')
         
         file_name = soup.find('title').text
@@ -82,44 +82,54 @@ def process_podcast(podcast, db, Episode):
             
             last_5_episodes.append(episode_data)
 
-        # Update podcast information
-        podcast.status = 'Done'
-        podcast.filename = file_name[:500]
-        podcast.last_updated = new_york_time()
-        podcast.title = title[:500]
-        podcast.description = description
-        podcast.contact_name = contact_name[:255]
-        podcast.contact_email = contact_email[:255]
-
+        # Get categories
         categories = soup.find_all('itunes:category')
         category_texts = [category['text'] for category in categories if category.has_attr('text')]
-        podcast.categories = ', '.join(category_texts[:3])[:500]
+        categories_str = ', '.join(category_texts[:3])
 
         # Create embedding for podcast description
         podcast_embedding = create_embedding(description)
-        podcast.embedding = podcast_embedding
+
+        # Update podcast in Supabase
+        supabase.table('podcasts').update({
+            "status": 'Done',
+            "filename": file_name[:500],
+            "last_updated": new_york_time(),
+            "title": title[:500],
+            "description": description,
+            "contact_name": contact_name[:255],
+            "contact_email": contact_email[:255],
+            "categories": categories_str[:500],
+            "embedding": podcast_embedding
+        }).eq('id', podcast['id']).execute()
 
         # Add episodes
         for episode_data in last_5_episodes:
-            episode = Episode(
-                podcast_id=podcast.id,
-                client_id=podcast.client_id,
-                title=episode_data['Title'][:500],
-                date=episode_data['Date'],
-                description=episode_data['Description']
-            )
-            
             # Create embedding for episode description
             episode_embedding = create_embedding(episode_data['Description'])
-            episode.embedding = episode_embedding
             
-            db.session.add(episode)
+            # Insert episode into Supabase
+            supabase.table('episodes').insert({
+                "podcast_id": podcast['id'],
+                "client_id": podcast['client_id'],
+                "title": episode_data['Title'][:500],
+                "date": episode_data['Date'],
+                "description": episode_data['Description'],
+                "embedding": episode_embedding
+            }).execute()
 
-        # Commit all changes
-        db.session.commit()
         logger.info(f'Processed podcast: {title}')
 
     except Exception as e:
-        logger.error(f'Error processing podcast {podcast.rss_feed}: {str(e)}')
-        db.session.rollback()
+        logger.error(f'Error processing podcast {podcast["rss_feed"]}: {str(e)}')
         raise
+
+def main():
+    try:
+        # Example usage or testing code here
+        pass
+    except Exception as e:
+        logger.error(f"Error in main: {str(e)}")
+
+if __name__ == "__main__":
+    main()
