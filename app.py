@@ -1,5 +1,5 @@
-from flask import Flask
-from flask_migrate import Migrate
+# app.py
+from flask import Flask, render_template
 import os
 import logging
 import openai
@@ -8,41 +8,30 @@ from routes import init_routes
 from database import supabase
 
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO,
+                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-
-
-# Set your OpenAI API key
-os.environ["OPENAI_API_KEY"] = "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"
-
 
 # Load environment variables
 load_dotenv()
 
-# Set your OpenAI API key
+# Set OpenAI API key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# Create Flask app
+app = Flask(__name__)
 
+# Basic configuration
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key')
 
+# Configure upload folder for files
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-def create_app():
-    app = Flask(__name__)
-
-    # Basic configuration
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.secret_key = 'your_secret_key'
-
-    # Configure upload folder
-    app.config['UPLOAD_FOLDER'] = os.path.join(os.path.dirname(__file__), 'uploads')
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    
-    
-    
-
-    # Initialize routes
-    init_routes(app)
-
-    return app
+# Initialize routes from routes.py
+app = init_routes(app)
 
 # Verify Supabase connection
 try:
@@ -51,6 +40,11 @@ try:
 except Exception as e:
     logger.error(f"Error connecting to Supabase: {str(e)}")
 
+# Test route
+@app.route('/health')
+def health_check():
+    return "OK", 200
+
 if __name__ == '__main__':
-    app = create_app()
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
