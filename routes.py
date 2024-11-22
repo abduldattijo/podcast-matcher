@@ -17,13 +17,37 @@ def parse_embedding_string(embedding_str):
         if isinstance(embedding_str, list):
             return embedding_str
         if isinstance(embedding_str, str):
-            # Remove brackets and split string into list of numbers
             embedding_str = embedding_str.strip('[]')
             return [float(x.strip()) for x in embedding_str.split(',')]
         return None
     except Exception as e:
         logger.error(f"Error parsing embedding: {str(e)}")
         return None
+
+def parse_listen_score_ranges(ls_ranges_str):
+    try:
+        if not ls_ranges_str:
+            return []
+        
+        ranges = []
+        for range_str in ls_ranges_str.split(','):
+            if range_str == "80-100":
+                ranges.append((80, 100))
+            else:
+                start, end = map(int, range_str.split('-'))
+                ranges.append((start, end))
+        return ranges
+    except Exception as e:
+        logger.error(f"Error parsing listen score ranges: {str(e)}")
+        return []
+
+def is_in_listen_score_range(score, ranges):
+    if not ranges:
+        return True
+    for start, end in ranges:
+        if start <= score <= end:
+            return True
+    return False
 
 def init_routes(app):
     @app.route('/')
@@ -49,7 +73,9 @@ def init_routes(app):
         except Exception as e:
             logger.error(f"Error fetching clients: {str(e)}")
             return jsonify({"error": str(e)}), 500
-
+        
+        
+    
     @app.route('/upload_client', methods=['POST'])
     def upload_client():
         try:
@@ -113,17 +139,11 @@ def init_routes(app):
             logger.error(f"Error in upload_client: {str(e)}")
             flash(f"Error uploading client data: {str(e)}")
             return redirect(url_for('upload_combined'))
-        
-        
-    
-    
-    
-    
-    
+
     @app.route('/upload_podcast', methods=['POST'])
     def upload_podcast():
         try:
-            from main import process_podcast
+            from scripts.main import process_podcast
 
             client_id = request.form.get("client_id")
             if not client_id:
@@ -207,14 +227,24 @@ def init_routes(app):
             logger.error(f"Error in upload_podcast: {str(e)}")
             flash(f"Error: {str(e)}")
             return redirect(url_for('upload_combined'))
-
+        
+        
+        
+        
+        
+        
     @app.route('/match_podcasts')
     def match_podcasts():
         try:
             client_id = request.args.get("client_id")
+            ls_ranges_str = request.args.get("ls_ranges", "")
 
             if not client_id:
                 return jsonify({"error": "Client ID is missing."}), 400
+
+            # Parse listen score ranges
+            ls_ranges = parse_listen_score_ranges(ls_ranges_str)
+            logger.info(f"Applying listen score ranges: {ls_ranges}")
 
             # Get client data from Supabase
             client_data = supabase.table('client_data')\
@@ -248,20 +278,26 @@ def init_routes(app):
             if not podcasts.data:
                 return jsonify({"error": "No podcasts found."}), 400
 
+            # Apply listen score filter and parse embeddings
             valid_podcasts = []
             for p in podcasts.data:
-                if p.get('embedding'):
-                    embedding = parse_embedding_string(p['embedding'])
-                    if embedding:
-                        p['embedding'] = embedding
-                        valid_podcasts.append(p)
+                try:
+                    listen_score = float(p['listen_score'])
+                    if p.get('embedding') and (not ls_ranges or is_in_listen_score_range(listen_score, ls_ranges)):
+                        embedding = parse_embedding_string(p['embedding'])
+                        if embedding:
+                            p['embedding'] = embedding
+                            valid_podcasts.append(p)
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Invalid listen score for podcast {p.get('id')}: {e}")
+                    continue
 
             if not valid_podcasts:
-                return jsonify({"error": "No valid podcast embeddings found."}), 400
+                return jsonify({"error": "No valid podcast matches found with the selected filters."}), 400
 
             podcast_embeddings = np.array([p['embedding'] for p in valid_podcasts])
 
-            # Get episodes from Supabase
+            # Get episodes
             episode_ids = [p['id'] for p in valid_podcasts]
             episodes = supabase.table('episodes')\
                 .select('*')\
@@ -405,4 +441,4 @@ def init_routes(app):
             logger.error(f"Error in match_podcasts: {str(e)}")
             return jsonify({"error": f"An error occurred during matching: {str(e)}"}), 500
 
-    return app    
+    return app        

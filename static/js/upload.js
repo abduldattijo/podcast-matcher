@@ -53,9 +53,18 @@ function handleFileSelect(e) {
                 <path d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
             </svg>
             <span>${file.name}</span>
+            <button onclick="removeFile(this)" class="text-red-500 hover:text-red-700 ml-2" type="button">×</button>
         `;
         selectedFilesDiv.appendChild(fileDiv);
     });
+}
+
+function removeFile(button) {
+    const fileDiv = button.parentElement;
+    fileDiv.remove();
+    // Clear the actual file input
+    const fileInput = document.getElementById('clientFiles');
+    fileInput.value = '';
 }
 
 function handlePodcastSelect(e) {
@@ -69,6 +78,7 @@ function handlePodcastSelect(e) {
                     <path d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path>
                 </svg>
                 <span>${file.name}</span>
+                <button onclick="removePodcastFile()" class="text-red-500 hover:text-red-700 ml-2" type="button">×</button>
             </div>
         `;
     } else {
@@ -76,6 +86,20 @@ function handlePodcastSelect(e) {
         alert('Please upload a CSV file');
         e.target.value = '';
     }
+}
+
+function removePodcastFile() {
+    const selectedFileDiv = document.getElementById('selectedPodcastFile');
+    selectedFileDiv.innerHTML = '';
+    const fileInput = document.getElementById('podcastFile');
+    fileInput.value = '';
+}
+
+function updateProgress(progressDiv, percentage) {
+    const progressBar = progressDiv.querySelector('.progress-bar');
+    const progressText = progressDiv.querySelector('span');
+    progressBar.style.width = percentage + '%';
+    progressText.textContent = percentage + '%';
 }
 
 async function showSuccessMessage(message) {
@@ -86,44 +110,6 @@ async function showSuccessMessage(message) {
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     successMessage.classList.remove('show');
-}
-
-function updateClientDropdowns(clients) {
-    const clientSelects = [
-        document.getElementById('clientSelect'),
-        document.getElementById('podcastClientSelect'),
-        document.getElementById('matchingClientSelect')
-    ];
-
-    clientSelects.forEach(select => {
-        const currentValue = select.value;
-        select.innerHTML = '<option value="">Select a client</option>';
-        
-        clients.forEach(client => {
-            const option = document.createElement('option');
-            option.value = client.id;
-            option.textContent = client.name;
-            select.appendChild(option);
-        });
-        
-        if (select.id === 'clientSelect') {
-            const newOption = document.createElement('option');
-            newOption.value = 'new';
-            newOption.textContent = 'Add New Client';
-            select.appendChild(newOption);
-        }
-        
-        if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
-            select.value = currentValue;
-        }
-    });
-}
-
-function updateProgress(progressDiv, percentage) {
-    const progressBar = progressDiv.querySelector('.progress-bar');
-    const progressText = progressDiv.querySelector('span');
-    progressBar.style.width = percentage + '%';
-    progressText.textContent = percentage + '%';
 }
 
 // Form submission handlers
@@ -222,4 +208,51 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Initialize filter listeners
+    initializeFilterListeners();
 });
+
+function initializeFilterListeners() {
+    const rangeCheckboxes = document.querySelectorAll('input[name="ls_range"]');
+    rangeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            const selectedRanges = Array.from(document.querySelectorAll('input[name="ls_range"]:checked'))
+                .map(cb => cb.value);
+            updateActiveFilters(selectedRanges);
+        });
+    });
+}
+
+function updateClientDropdowns(clients) {
+    const clientSelects = [
+        document.getElementById('clientSelect'),
+        document.getElementById('podcastClientSelect'),
+        document.getElementById('matchingClientSelect')
+    ];
+
+    clientSelects.forEach(select => {
+        if (select) {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Select a client</option>';
+            
+            clients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = client.name;
+                select.appendChild(option);
+            });
+            
+            if (select.id === 'clientSelect') {
+                const newOption = document.createElement('option');
+                newOption.value = 'new';
+                newOption.textContent = 'Add New Client';
+                select.appendChild(newOption);
+            }
+            
+            if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
+                select.value = currentValue;
+            }
+        }
+    });
+}
