@@ -20,9 +20,17 @@ function handleFileDrop(e) {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.remove('dragover');
-    const files = e.dataTransfer.files;
+    const files = Array.from(e.dataTransfer.files).filter(file => 
+        file.name.match(/\.(txt|docx|html)$/i)
+    );
+    if (files.length === 0) {
+        alert('Please upload only .txt, .docx, or .html files');
+        return;
+    }
     const input = document.getElementById('clientFiles');
-    input.files = files;
+    const dt = new DataTransfer();
+    files.forEach(file => dt.items.add(file));
+    input.files = dt.files;
     handleFileSelect({ target: input });
 }
 
@@ -46,6 +54,13 @@ function handleFileSelect(e) {
     selectedFilesDiv.innerHTML = '';
     
     Array.from(files).forEach(file => {
+        // Check allowed file types
+        if (!file.name.match(/\.(txt|docx|html)$/i)) {
+            alert('Please upload only .txt, .docx, or .html files');
+            e.target.value = '';
+            return;
+        }
+
         const fileDiv = document.createElement('div');
         fileDiv.className = 'flex items-center space-x-2 text-sm text-gray-600 bg-gray-100 p-2 rounded';
         fileDiv.innerHTML = `
@@ -62,7 +77,6 @@ function handleFileSelect(e) {
 function removeFile(button) {
     const fileDiv = button.parentElement;
     fileDiv.remove();
-    // Clear the actual file input
     const fileInput = document.getElementById('clientFiles');
     fileInput.value = '';
 }
@@ -112,7 +126,37 @@ async function showSuccessMessage(message) {
     successMessage.classList.remove('show');
 }
 
-// Form submission handlers
+function updateClientDropdowns(clients) {
+    const clientSelects = [
+        document.getElementById('clientSelect'),
+        document.getElementById('podcastClientSelect'),
+        document.getElementById('matchingClientSelect')
+    ];
+
+    clientSelects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Select a client</option>';
+        
+        clients.forEach(client => {
+            const option = document.createElement('option');
+            option.value = client.id;
+            option.textContent = client.name;
+            select.appendChild(option);
+        });
+        
+        if (select.id === 'clientSelect') {
+            const newOption = document.createElement('option');
+            newOption.value = 'new';
+            newOption.textContent = 'Add New Client';
+            select.appendChild(newOption);
+        }
+        
+        if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
+            select.value = currentValue;
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const clientForm = document.getElementById('clientForm');
     const podcastForm = document.getElementById('podcastForm');
@@ -208,51 +252,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    // Initialize filter listeners
-    initializeFilterListeners();
 });
-
-function initializeFilterListeners() {
-    const rangeCheckboxes = document.querySelectorAll('input[name="ls_range"]');
-    rangeCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            const selectedRanges = Array.from(document.querySelectorAll('input[name="ls_range"]:checked'))
-                .map(cb => cb.value);
-            updateActiveFilters(selectedRanges);
-        });
-    });
-}
-
-function updateClientDropdowns(clients) {
-    const clientSelects = [
-        document.getElementById('clientSelect'),
-        document.getElementById('podcastClientSelect'),
-        document.getElementById('matchingClientSelect')
-    ];
-
-    clientSelects.forEach(select => {
-        if (select) {
-            const currentValue = select.value;
-            select.innerHTML = '<option value="">Select a client</option>';
-            
-            clients.forEach(client => {
-                const option = document.createElement('option');
-                option.value = client.id;
-                option.textContent = client.name;
-                select.appendChild(option);
-            });
-            
-            if (select.id === 'clientSelect') {
-                const newOption = document.createElement('option');
-                newOption.value = 'new';
-                newOption.textContent = 'Add New Client';
-                select.appendChild(newOption);
-            }
-            
-            if (currentValue && select.querySelector(`option[value="${currentValue}"]`)) {
-                select.value = currentValue;
-            }
-        }
-    });
-}
