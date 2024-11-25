@@ -9,6 +9,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import logging
 from utils import create_embedding
 from database import supabase
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,23 @@ def is_in_listen_score_range(score, ranges):
             return True
     return False
 
+def extract_text_from_html(html_content):
+    try:
+        soup = BeautifulSoup(html_content, 'html.parser')
+        # Remove script and style elements
+        for script in soup(["script", "style"]):
+            script.decompose()
+        # Get text
+        text = soup.get_text()
+        # Clean up whitespace
+        lines = (line.strip() for line in text.splitlines())
+        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+        text = ' '.join(chunk for chunk in chunks if chunk)
+        return text
+    except Exception as e:
+        logger.error(f"Error extracting text from HTML: {str(e)}")
+        return None
+
 def init_routes(app):
     @app.route('/')
     def index():
@@ -73,9 +91,7 @@ def init_routes(app):
         except Exception as e:
             logger.error(f"Error fetching clients: {str(e)}")
             return jsonify({"error": str(e)}), 500
-        
-        
-    
+
     @app.route('/upload_client', methods=['POST'])
     def upload_client():
         try:
@@ -115,6 +131,12 @@ def init_routes(app):
                         elif filename.endswith('.docx'):
                             doc = Document(filepath)
                             transcription = '\n'.join([paragraph.text for paragraph in doc.paragraphs])
+                        elif filename.endswith('.html'):
+                            with open(filepath, 'r', encoding='utf-8') as f:
+                                html_content = f.read()
+                            transcription = extract_text_from_html(html_content)
+                            if not transcription:
+                                transcription = "Error processing HTML file"
                         else:
                             transcription = "Unsupported file type"
                             logger.warning(f"Unsupported file type: {filename}")
@@ -227,12 +249,7 @@ def init_routes(app):
             logger.error(f"Error in upload_podcast: {str(e)}")
             flash(f"Error: {str(e)}")
             return redirect(url_for('upload_combined'))
-        
-        
-        
-        
-        
-        
+
     @app.route('/match_podcasts')
     def match_podcasts():
         try:
@@ -441,4 +458,4 @@ def init_routes(app):
             logger.error(f"Error in match_podcasts: {str(e)}")
             return jsonify({"error": f"An error occurred during matching: {str(e)}"}), 500
 
-    return app        
+    return app

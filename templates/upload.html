@@ -69,9 +69,10 @@
                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
                         </svg>
-                        <p class="text-center mt-2">Drag and drop txt or doc files here or click to browse</p>
+                        <p class="text-center mt-2">Drag and drop files here or click to browse</p>
+                        <p class="text-center text-sm text-gray-500">Supported formats: .txt, .docx, .html</p>
                     </div>
-                    <input type="file" id="clientFiles" name="files" multiple class="hidden" onchange="handleFileSelect(event)">
+                    <input type="file" id="clientFiles" name="files" multiple accept=".txt,.docx,.html" class="hidden" onchange="handleFileSelect(event)">
                     <div id="selectedClientFiles" class="mt-2 space-y-2"></div>
                     <div id="clientUploadProgress" class="hidden mt-4">
                         <div class="w-full bg-gray-200 rounded-full h-2.5">

@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime
 import logging
 
+
 logger = logging.getLogger(__name__)
 
 def create_embedding(text):
