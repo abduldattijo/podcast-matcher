@@ -43,3 +43,15 @@
 2024-11-26 20:16:18,485 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=%2A&podcast_id=in.%2816%2C17%2C18%2C19%2C20%29 "HTTP/2 200 OK"
 2024-11-26 20:16:18,817 - __main__ - INFO - Response status: 200 OK
 2024-11-26 20:16:18,818 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:16:18] "GET /match_podcasts?client_id=8&min_score=20&max_score=100&include_blank=false HTTP/1.1" 200 -
+2024-11-26 20:17:55,252 - __main__ - INFO - Incoming request: POST /upload_client
+2024-11-26 20:17:57,173 - httpx - INFO - HTTP Request: POST https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/client_data "HTTP/2 201 Created"
+2024-11-26 20:17:57,176 - __main__ - INFO - Response status: 302 FOUND
+2024-11-26 20:17:57,178 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:17:57] "[32mPOST /upload_client HTTP/1.1[0m" 302 -
+2024-11-26 20:17:57,188 - __main__ - INFO - Incoming request: GET /upload_combined
+2024-11-26 20:17:57,326 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2024-11-26 20:17:57,328 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:17:57,329 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:17:57] "GET /upload_combined HTTP/1.1" 200 -
+2024-11-26 20:17:57,341 - __main__ - INFO - Incoming request: GET /get_clients
+2024-11-26 20:17:57,508 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2024-11-26 20:17:57,510 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:17:57,512 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:17:57] "GET /get_clients HTTP/1.1" 200 -
