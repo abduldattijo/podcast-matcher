@@ -65,12 +65,13 @@ def create_app():
             logger.info("Configuring Gunicorn settings")
             # Increase timeouts and worker configurations
             app.config.update(
-                GUNICORN_TIMEOUT=300,  # 5 minutes
-                GUNICORN_WORKERS=3,
+                GUNICORN_TIMEOUT=600,  # 10 minutes
+                GUNICORN_WORKERS=2,
                 GUNICORN_WORKER_CLASS='sync',
-                GUNICORN_MAX_REQUESTS=1000,
+                GUNICORN_MAX_REQUESTS=100,
                 GUNICORN_MAX_REQUESTS_JITTER=50,
-                GUNICORN_KEEPALIVE=5
+                GUNICORN_KEEPALIVE=5,
+                GUNICORN_WORKER_CONNECTIONS=1000
             )
 
         return app
