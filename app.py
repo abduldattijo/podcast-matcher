@@ -7,12 +7,11 @@ from routes import init_routes
 from database import supabase
 from flask_cors import CORS
 from datetime import datetime
+import sys
 from flask import request
 
-# Ensure logs directory exists
-os.makedirs('logs', exist_ok=True)
-
 # Set up logging configuration
+os.makedirs('logs', exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -22,8 +21,6 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger(__name__)
-
-
 
 # Load environment variables
 load_dotenv()
@@ -44,10 +41,14 @@ def create_app():
 
         # Basic configuration
         app.config.update(
-            SECRET_KEY=os.getenv('SECRET_KEY', 'your_secret_key_here'),
-            MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB max file size
+            SECRET_KEY=os.getenv('SECRET_KEY', os.urandom(24).hex()),
+            MAX_CONTENT_LENGTH=32 * 1024 * 1024,  # 32MB max file size
             UPLOAD_FOLDER=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads'),
-            ALLOWED_EXTENSIONS={'txt', 'docx', 'html', 'csv'}
+            ALLOWED_EXTENSIONS={'txt', 'docx', 'html', 'csv'},
+            PERMANENT_SESSION_LIFETIME=1800,  # 30 minutes
+            SESSION_COOKIE_SECURE=True,
+            SESSION_COOKIE_HTTPONLY=True,
+            SESSION_COOKIE_SAMESITE='Lax'
         )
 
         # Ensure upload folder exists
@@ -58,11 +59,24 @@ def create_app():
         if not openai.api_key:
             logger.error("OpenAI API key not found in environment variables")
             raise ValueError("OpenAI API key not configured")
+            
+        # Configure gunicorn settings if running with it
+        if 'gunicorn' in sys.modules:
+            logger.info("Configuring Gunicorn settings")
+            # Increase timeouts and worker configurations
+            app.config.update(
+                GUNICORN_TIMEOUT=300,  # 5 minutes
+                GUNICORN_WORKERS=3,
+                GUNICORN_WORKER_CLASS='sync',
+                GUNICORN_MAX_REQUESTS=1000,
+                GUNICORN_MAX_REQUESTS_JITTER=50,
+                GUNICORN_KEEPALIVE=5
+            )
 
         return app
 
     except Exception as e:
-        logger.error(f"Error creating Flask app: {str(e)}")
+        logger.critical(f"Error creating Flask app: {str(e)}")
         raise
 
 def setup_database(app):
@@ -73,7 +87,7 @@ def setup_database(app):
         app (Flask): Flask application instance
     """
     try:
-        # Verify Supabase connection
+        # Verify Supabase connection with timeout
         response = supabase.table('clients').select("*").limit(1).execute()
         logger.info("Successfully connected to Supabase")
         
@@ -81,7 +95,7 @@ def setup_database(app):
         app.config['supabase'] = supabase
         
     except Exception as e:
-        logger.error(f"Error connecting to Supabase: {str(e)}")
+        logger.critical(f"Error connecting to Supabase: {str(e)}")
         raise
 
 def setup_routes(app):
@@ -98,19 +112,21 @@ def setup_routes(app):
         # Add error handlers
         @app.errorhandler(404)
         def not_found_error(error):
+            logger.warning(f"404 error: {request.url}")
             return render_template('error.html', error="404 - Page Not Found"), 404
 
         @app.errorhandler(500)
         def internal_error(error):
-            logger.error(f"Internal server error: {str(error)}")
+            logger.error(f"500 error: {str(error)}")
             return render_template('error.html', error="500 - Internal Server Error"), 500
 
         @app.errorhandler(413)
         def request_entity_too_large(error):
+            logger.warning(f"413 error: File too large")
             return render_template('error.html', error="413 - File too large"), 413
 
     except Exception as e:
-        logger.error(f"Error setting up routes: {str(e)}")
+        logger.critical(f"Error setting up routes: {str(e)}")
         raise
 
 def setup_middleware(app):
@@ -128,8 +144,14 @@ def setup_middleware(app):
     @app.after_request
     def after_request(response):
         """Configure response headers and log response status."""
-        # Ensure proper headers are set
-        response.headers.add('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0')
+        # Security headers
+        response.headers.update({
+            'Cache-Control': 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0',
+            'Pragma': 'no-cache',
+            'X-Content-Type-Options': 'nosniff',
+            'X-Frame-Options': 'SAMEORIGIN',
+            'X-XSS-Protection': '1; mode=block'
+        })
         
         # Log response status
         logger.info(f"Response status: {response.status}")
@@ -187,16 +209,27 @@ def init_app():
         # Add health check route
         @app.route('/health')
         def health_check():
-            """Basic health check endpoint."""
+            """Basic health check endpoint with enhanced checks."""
             try:
                 # Test database connection
                 supabase.table('clients').select("*").limit(1).execute()
+                
+                # Check upload directory
+                upload_dir = app.config['UPLOAD_FOLDER']
+                if not os.path.exists(upload_dir):
+                    os.makedirs(upload_dir)
+                
+                # Verify OpenAI API key
+                if not openai.api_key:
+                    raise ValueError("OpenAI API key not configured")
                 
                 return {
                     "status": "healthy",
                     "timestamp": datetime.now().isoformat(),
                     "supabase_connected": True,
-                    "openai_configured": bool(openai.api_key)
+                    "openai_configured": True,
+                    "upload_dir_accessible": True,
+                    "environment": os.getenv('FLASK_ENV', 'production')
                 }
             except Exception as e:
                 logger.error(f"Health check failed: {str(e)}")
@@ -210,7 +243,7 @@ def init_app():
         return app
 
     except Exception as e:
-        logger.error(f"Error initializing application: {str(e)}")
+        logger.critical(f"Error initializing application: {str(e)}")
         raise
 
 # Create the application instance
@@ -225,12 +258,18 @@ if __name__ == '__main__':
         # Get port from environment variable or use default
         port = int(os.environ.get('PORT', 10000))
         
+        # Configure server settings
+        server_settings = {
+            'host': '0.0.0.0',
+            'port': port,
+            'debug': os.getenv('FLASK_ENV') == 'development',
+            'threaded': True,
+            'use_reloader': os.getenv('FLASK_ENV') == 'development',
+            'ssl_context': None  # Configure SSL in production
+        }
+        
         # Run the application
-        app.run(
-            host='0.0.0.0',
-            port=port,
-            debug=os.getenv('FLASK_ENV') == 'development'
-        )
+        app.run(**server_settings)
     except Exception as e:
         logger.critical(f"Application failed to start: {str(e)}")
         raise

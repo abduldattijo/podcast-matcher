@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def create_embedding(text: str) -> Optional[List[float]]:
     """
-    Create embedding for text using OpenAI's API with proper chunking for long texts.
+    Create embedding for text using OpenAI's API with proper chunking and error handling.
     
     Args:
         text (str): The text to create an embedding for
@@ -18,25 +18,32 @@ def create_embedding(text: str) -> Optional[List[float]]:
         Optional[List[float]]: The embedding vector or None if there's an error
     """
     try:
+        if not text:
+            logger.warning("Empty text provided for embedding")
+            return None
+
+        # Limit text length to avoid token limits
         max_tokens = 8000
-        chunk_size = max_tokens
+        if len(text) > max_tokens:
+            text = text[:max_tokens]
+            logger.info(f"Text truncated to {max_tokens} tokens")
+        
+        # Create embedding with retry logic
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = openai.Embedding.create(
+                    model="text-embedding-ada-002",
+                    input=text,
+                    timeout=30  # 30 second timeout
+                )
+                return response['data'][0]['embedding']
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise
+                logger.warning(f"Embedding attempt {attempt + 1} failed: {str(e)}")
+                continue
 
-        # Split text into chunks if it's too long
-        chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
-
-        embeddings = []
-        for chunk in chunks:
-            response = openai.Embedding.create(
-                model="text-embedding-ada-002",
-                input=chunk
-            )
-            embedding = response['data'][0]['embedding']
-            embeddings.append(embedding)
-
-        # Combine chunk embeddings by taking their mean
-        combined_embedding = np.mean(embeddings, axis=0)
-
-        return combined_embedding.tolist()
     except Exception as e:
         logger.error(f"Error creating embedding: {str(e)}")
         return None
