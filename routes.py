@@ -7,14 +7,15 @@ from docx import Document
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
-from utils import create_embedding, generate_score_reason, generate_mismatch_explanation
-from database import supabase
-from bs4 import BeautifulSoup
 from utils import (
+    create_embedding,
+    generate_score_reason,
+    generate_mismatch_explanation,
     extract_text_from_html,
     parse_embedding_string,
     calculate_recency_score
 )
+from database import supabase
 import time
 
 logger = logging.getLogger(__name__)
@@ -26,14 +27,12 @@ def process_batch(batch, client_id, supabase):
     
     for row in batch:
         try:
-            # Check if podcast exists for this client
             existing_podcast = supabase.table('podcasts')\
                 .select('*')\
                 .eq('rss_feed', row['RSS Feed'])\
                 .eq('client_id', client_id)\
                 .execute()
 
-            # Check if podcast exists for other clients
             other_client_podcast = supabase.table('podcasts')\
                 .select('*')\
                 .eq('rss_feed', row['RSS Feed'])\
@@ -195,7 +194,6 @@ def init_routes(app):
                 csv_reader = csv.DictReader(StringIO(csv_data))
                 rows = list(csv_reader)
                 
-                # Process in smaller batches with delay
                 batch_size = 2
                 total_rows = len(rows)
                 total_processed = 0
@@ -205,11 +203,9 @@ def init_routes(app):
                     batch_processed = process_batch(batch, client_id, supabase)
                     total_processed += batch_processed
                     
-                    # Log progress
                     progress = (i + len(batch)) / total_rows * 100
                     logger.info(f"Progress: {progress:.1f}% ({total_processed}/{total_rows} podcasts processed)")
                     
-                    # Add delay between batches
                     if i + batch_size < total_rows:
                         time.sleep(1)
                 
@@ -232,7 +228,6 @@ def init_routes(app):
             if not client_id:
                 return jsonify({"error": "Client ID is missing."}), 400
 
-            # Get client data
             client_data = supabase.table('client_data')\
                 .select('*')\
                 .eq('client_id', client_id)\
@@ -241,7 +236,6 @@ def init_routes(app):
             if not client_data.data:
                 return jsonify({"error": "No client data found."}), 400
 
-            # Parse embeddings
             valid_client_files = []
             for data in client_data.data:
                 if data.get('embedding'):
@@ -255,7 +249,6 @@ def init_routes(app):
             
             client_embeddings = np.array([data['embedding'] for data in valid_client_files])
 
-            # Get podcasts with listen score filter
             podcasts = supabase.table('podcasts')\
                 .select('*')\
                 .eq('client_id', client_id)\
@@ -264,7 +257,6 @@ def init_routes(app):
             if not podcasts.data:
                 return jsonify({"error": "No podcasts found."}), 400
 
-            # Apply listen score filter and parse embeddings
             valid_podcasts = []
             for podcast in podcasts.data:
                 try:
@@ -292,7 +284,6 @@ def init_routes(app):
 
             podcast_embeddings = np.array([p['embedding'] for p in valid_podcasts])
 
-            # Get episodes
             episode_ids = [p['id'] for p in valid_podcasts]
             episodes = supabase.table('episodes')\
                 .select('*')\
@@ -309,10 +300,8 @@ def init_routes(app):
 
             final_scores = []
             for podcast in valid_podcasts:
-                # Get podcast's episodes
                 podcast_episodes = [e for e in valid_episodes if e['podcast_id'] == podcast['id']]
                 
-                # Calculate scores
                 relevance_scores = cosine_similarity([podcast['embedding']], client_embeddings)
                 relevance_score = float(relevance_scores.mean()) * 100
 
@@ -327,7 +316,6 @@ def init_routes(app):
                 host_interest_score = 100.0 * (1 - podcast['global_rank'])
                 recency_score = calculate_recency_score(podcast.get('last_updated'))
 
-                # Calculate weighted aggregate score
                 weights = {
                     'relevance': 0.35,
                     'audience': 0.25,
@@ -344,7 +332,6 @@ def init_routes(app):
                     host_interest_score * weights['host_interest']
                 )
 
-                # Generate explanations
                 reason = generate_score_reason(podcast, relevance_score, audience_score, recency_score)
                 potential_mismatch = generate_mismatch_explanation(podcast, relevance_score, audience_score, recency_score)
 
@@ -360,7 +347,6 @@ def init_routes(app):
                     "potential_mismatch": potential_mismatch
                 })
 
-            # Sort by aggregate score
             final_scores.sort(key=lambda x: x["aggregate_score"], reverse=True)
             return jsonify(final_scores)
 
