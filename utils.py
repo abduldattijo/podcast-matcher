@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def create_embedding(text: str) -> Optional[List[float]]:
     """
-    Create embedding for text using OpenAI's API with proper chunking and error handling.
+    Create embedding for text using OpenAI's API with proper chunking for long texts.
     
     Args:
         text (str): The text to create an embedding for
@@ -18,54 +18,28 @@ def create_embedding(text: str) -> Optional[List[float]]:
         Optional[List[float]]: The embedding vector or None if there's an error
     """
     try:
-        if not text:
-            logger.warning("Empty text provided for embedding")
-            return None
-
-        # Limit text length to avoid token limits
         max_tokens = 8000
-        if len(text) > max_tokens:
-            text = text[:max_tokens]
-            logger.info(f"Text truncated to {max_tokens} tokens")
-        
-        # Create embedding with retry logic
-        max_retries = 3
-        for attempt in range(max_retries):
-            try:
-                response = openai.Embedding.create(
-                    model="text-embedding-ada-002",
-                    input=text,
-                    timeout=30  # 30 second timeout
-                )
-                return response['data'][0]['embedding']
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    raise
-                logger.warning(f"Embedding attempt {attempt + 1} failed: {str(e)}")
-                continue
+        chunk_size = max_tokens
 
+        # Split text into chunks if it's too long
+        chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
+
+        embeddings = []
+        for chunk in chunks:
+            response = openai.Embedding.create(
+                model="text-embedding-ada-002",
+                input=chunk
+            )
+            embedding = response['data'][0]['embedding']
+            embeddings.append(embedding)
+
+        # Combine chunk embeddings by taking their mean
+        combined_embedding = np.mean(embeddings, axis=0)
+
+        return combined_embedding.tolist()
     except Exception as e:
         logger.error(f"Error creating embedding: {str(e)}")
         return None
-    
-    
-def extract_text_from_html(html_content):
-    """Extract clean text from HTML content."""
-    try:
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(html_content, 'html.parser')
-        # Remove script and style elements
-        for script in soup(["script", "style"]):
-            script.decompose()
-        # Get text and clean whitespace
-        text = soup.get_text()
-        lines = (line.strip() for line in text.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        text = ' '.join(chunk for chunk in chunks if chunk)
-        return text
-    except Exception as e:
-        logger.error(f"Error extracting text from HTML: {str(e)}")
-        return None    
 
 def format_date(date_str: str) -> str:
     """
