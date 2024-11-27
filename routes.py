@@ -12,7 +12,7 @@ from database import supabase
 from bs4 import BeautifulSoup
 from utils import (
     extract_text_from_html,
-    parse_embedding_string, 
+    parse_embedding_string,
     calculate_recency_score
 )
 import time

@@ -47,6 +47,25 @@ def create_embedding(text: str) -> Optional[List[float]]:
     except Exception as e:
         logger.error(f"Error creating embedding: {str(e)}")
         return None
+    
+    
+def extract_text_from_html(html_content):
+    """Extract clean text from HTML content."""
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(html_content, 'html.parser')
+        # Remove script and style elements
+        for script in soup(["script", "style"]):
+            script.decompose()
+        # Get text and clean whitespace
+        text = soup.get_text()
+        lines = (line.strip() for line in text.splitlines())
+        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+        text = ' '.join(chunk for chunk in chunks if chunk)
+        return text
+    except Exception as e:
+        logger.error(f"Error extracting text from HTML: {str(e)}")
+        return None    
 
 def format_date(date_str: str) -> str:
     """
