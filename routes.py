@@ -10,42 +10,19 @@ import logging
 from utils import create_embedding, generate_score_reason, generate_mismatch_explanation
 from database import supabase
 from bs4 import BeautifulSoup
-from concurrent.futures import ThreadPoolExecutor
-from utils import calculate_recency_score
+from utils import (
+    extract_text_from_html,
+    parse_embedding_string, 
+    calculate_recency_score
+)
+import time
 
 logger = logging.getLogger(__name__)
-
-def parse_embedding_string(embedding_str):
-    """Parse embedding string into a list of floats."""
-    try:
-        if isinstance(embedding_str, list):
-            return embedding_str
-        if isinstance(embedding_str, str):
-            embedding_str = embedding_str.strip('[]')
-            return [float(x.strip()) for x in embedding_str.split(',')]
-        return None
-    except Exception as e:
-        logger.error(f"Error parsing embedding: {str(e)}")
-        return None
-
-def extract_text_from_html(html_content):
-    """Extract clean text from HTML content."""
-    try:
-        soup = BeautifulSoup(html_content, 'html.parser')
-        for script in soup(["script", "style"]):
-            script.decompose()
-        text = soup.get_text()
-        lines = (line.strip() for line in text.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        text = ' '.join(chunk for chunk in chunks if chunk)
-        return text
-    except Exception as e:
-        logger.error(f"Error extracting text from HTML: {str(e)}")
-        return None
 
 def process_batch(batch, client_id, supabase):
     """Process a batch of podcasts."""
     from main import process_podcast
+    processed_count = 0
     
     for row in batch:
         try:
@@ -67,7 +44,8 @@ def process_batch(batch, client_id, supabase):
                 podcast = existing_podcast.data[0]
                 if podcast['status'] != 'Done':
                     process_podcast(podcast, supabase)
-                logger.info(f"Updated existing podcast: {podcast['title'] or row['RSS Feed']}")
+                    processed_count += 1
+                    logger.info(f"Updated existing podcast: {podcast['title'] or row['RSS Feed']}")
             else:
                 new_podcast = {
                     "client_id": client_id,
@@ -83,13 +61,17 @@ def process_batch(batch, client_id, supabase):
                 new_podcast_data = response.data[0]
                 
                 process_podcast(new_podcast_data, supabase)
-                logger.info(f"Added new podcast: {new_podcast_data['title'] or row['RSS Feed']}")
+                processed_count += 1
+                logger.info(f"Added new podcast: {row['RSS Feed']}")
 
                 if other_client_podcast.data:
                     logger.info(f"Note: Podcast '{row['RSS Feed']}' exists for another client")
 
         except Exception as e:
             logger.error(f"Error processing podcast row: {str(e)}")
+            continue
+            
+    return processed_count
 
 def init_routes(app):
     @app.route('/')
@@ -213,14 +195,26 @@ def init_routes(app):
                 csv_reader = csv.DictReader(StringIO(csv_data))
                 rows = list(csv_reader)
                 
-                # Process in batches
-                batch_size = 3
-                for i in range(0, len(rows), batch_size):
-                    batch = rows[i:i + batch_size]
-                    process_batch(batch, client_id, supabase)
+                # Process in smaller batches with delay
+                batch_size = 2
+                total_rows = len(rows)
+                total_processed = 0
                 
-                flash("Podcast data uploaded successfully.")
-            return redirect(url_for('upload_combined'))
+                for i in range(0, total_rows, batch_size):
+                    batch = rows[i:i + batch_size]
+                    batch_processed = process_batch(batch, client_id, supabase)
+                    total_processed += batch_processed
+                    
+                    # Log progress
+                    progress = (i + len(batch)) / total_rows * 100
+                    logger.info(f"Progress: {progress:.1f}% ({total_processed}/{total_rows} podcasts processed)")
+                    
+                    # Add delay between batches
+                    if i + batch_size < total_rows:
+                        time.sleep(1)
+                
+                flash(f"Successfully processed {total_processed} podcasts")
+                return redirect(url_for('upload_combined'))
 
         except Exception as e:
             logger.error(f"Error in upload_podcast: {str(e)}")
