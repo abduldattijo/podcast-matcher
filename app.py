@@ -59,6 +59,10 @@ def create_app():
             SECRET_KEY=os.getenv('SECRET_KEY', 'your_secret_key_here'),
             MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB max file size
             UPLOAD_FOLDER=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads'),
+            SESSION_COOKIE_SAMESITE='Lax',
+            SESSION_COOKIE_SECURE=True,
+            PERMANENT_SESSION_LIFETIME=1800,  # 30 minutes
+            SESSION_COOKIE_HTTPONLY=True,
             ALLOWED_EXTENSIONS={'txt', 'docx', 'html', 'csv'}
         )
 
