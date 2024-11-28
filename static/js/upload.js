@@ -229,7 +229,7 @@ function toggleClientInput() {
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData,
-                    timeout: 3000000  // 50 minutes timeout
+                    timeout: 30000000  // 50 minutes timeout
                 });
  
                 clearInterval(interval);
