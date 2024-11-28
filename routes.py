@@ -18,6 +18,13 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+def log_validation_summary(processing_results):
+    logger.info("Validation summary:")
+    logger.info(f"New: {len(processing_results['new'])}")
+    logger.info(f"Updated: {len(processing_results['updated'])}")
+    logger.info(f"Skipped: {len(processing_results['skipped'])}")
+    logger.info(f"Error: {len(processing_results['error'])}")
+
 def compress_messages(podcasts, status):
     """Compress list of podcast names into a summary"""
     if not podcasts:
@@ -247,6 +254,13 @@ def init_routes(app):
     @app.route('/upload_podcast', methods=['POST'])
     @monitor_memory
     def upload_podcast():
+        processing_results = {
+            'new': [],
+            'updated': [],
+            'skipped': [],
+            'error': []
+        }
+        
         try:
             from main import process_podcast
 
@@ -265,96 +279,102 @@ def init_routes(app):
                 return redirect(url_for('upload_combined'))
 
             if file:
+                # Read and validate CSV data
                 csv_data = file.read().decode('utf-8')
                 csv_reader = csv.DictReader(StringIO(csv_data))
                 rows = list(csv_reader)
                 
-                # Skip rows with missing RSS feed
-                valid_rows = [row for row in rows if row.get('RSS Feed')]
-                
+                # Validate all rows first
+                valid_rows = []
+                for row in rows:
+                    validated_data = validate_podcast_row(row)
+                    if validated_data:
+                        valid_rows.append(validated_data)
+                    else:
+                        processing_results['error'].append(row.get('RSS Feed', 'Unknown RSS Feed'))
+
                 if not valid_rows:
                     flash("No valid podcast data found in CSV.")
                     return redirect(url_for('upload_combined'))
-                
-                # Process tracking
-                processing_results = {
-                    'new': [],
-                    'updated': [],
-                    'skipped': [],
-                    'error': []
-                }
-                
-                # Get all RSS feeds at once
-                all_rss_feeds = [row['RSS Feed'] for row in valid_rows]
-                
-                # Batch query existing podcasts
-                existing_podcasts = supabase.table('podcasts')\
-                    .select('*')\
-                    .in_('rss_feed', all_rss_feeds)\
-                    .execute()
 
-                existing_by_rss = {
-                    podcast['rss_feed']: podcast 
-                    for podcast in existing_podcasts.data
-                }
-                
                 # Process in chunks
                 CHUNK_SIZE = 5
-                for i in range(0, len(valid_rows), CHUNK_SIZE):
-                    chunk = valid_rows[i:i + CHUNK_SIZE]
-                    
-                    for row in chunk:
-                        try:
-                            rss_feed = row['RSS Feed']
-                            existing = existing_by_rss.get(rss_feed)
+                for chunk in chunked_iterable(valid_rows, CHUNK_SIZE):
+                    try:
+                        # Get existing podcasts for this chunk
+                        rss_feeds = [row['rss_feed'] for row in chunk]
+                        existing_podcasts = supabase.table('podcasts')\
+                            .select('*')\
+                            .in_('rss_feed', rss_feeds)\
+                            .execute()
 
-                            validated_data = validate_podcast_row(row)
-                            if not validated_data:
+                        existing_by_rss = {
+                            podcast['rss_feed']: podcast 
+                            for podcast in existing_podcasts.data
+                        }
+
+                        # Process each podcast in chunk
+                        for validated_data in chunk:
+                            try:
+                                rss_feed = validated_data['rss_feed']
+                                existing = existing_by_rss.get(rss_feed)
+
+                                if existing:
+                                    if existing['client_id'] == client_id:
+                                        if existing['status'] != 'Done':
+                                            process_podcast(existing, supabase)
+                                            processing_results['updated'].append(existing['title'] or rss_feed)
+                                        else:
+                                            processing_results['skipped'].append(existing['title'] or rss_feed)
+                                    continue
+
+                                # Create new podcast
+                                new_podcast = {
+                                    "client_id": client_id,
+                                    "search_term": validated_data["search_term"],
+                                    "listennotes_url": validated_data["listennotes_url"],
+                                    "listen_score": validated_data["listen_score"],
+                                    "global_rank": validated_data["global_rank"],
+                                    "rss_feed": validated_data["rss_feed"],
+                                    "status": "New"
+                                }
+
+                                response = supabase.table('podcasts').insert(new_podcast).execute()
+                                new_podcast_data = response.data[0]
+                                
+                                process_podcast(new_podcast_data, supabase)
+                                processing_results['new'].append(new_podcast_data['title'] or rss_feed)
+
+                            except Exception as e:
+                                logger.error(f"Error processing podcast {rss_feed}: {str(e)}")
                                 processing_results['error'].append(rss_feed)
-                                continue
 
-                            if existing:
-                                if existing['client_id'] == client_id:
-                                    if existing['status'] != 'Done':
-                                        process_podcast(existing, supabase)
-                                        processing_results['updated'].append(existing['title'] or rss_feed)
-                                    else:
-                                        processing_results['skipped'].append(existing['title'] or rss_feed)
-                                continue
+                        # Memory cleanup after each chunk
+                        gc.collect()
+                        time.sleep(0.5)
 
-                            new_podcast = {
-                                "client_id": client_id,
-                                "search_term": validated_data["search_term"],
-                                "listennotes_url": validated_data["listennotes_url"],
-                                "listen_score": validated_data["listen_score"],
-                                "global_rank": validated_data["global_rank"],
-                                "rss_feed": validated_data["rss_feed"],
-                                "status": "New"
-                            }
-                            
-                            response = supabase.table('podcasts').insert(new_podcast).execute()
-                            new_podcast_data = response.data[0]
-                            
-                            process_podcast(new_podcast_data, supabase)
-                            processing_results['new'].append(new_podcast_data['title'] or rss_feed)
+                    except Exception as e:
+                        logger.error(f"Error processing chunk: {str(e)}")
+                        continue
 
-                        except Exception as e:
-                            logger.error(f"Error processing podcast row: {str(e)}")
-                            processing_results['error'].append(rss_feed)
+                # Log validation summary
+                log_validation_summary(processing_results)
 
-                    gc.collect()
-                    time.sleep(0.5)
+                # Create summary messages
+                messages = [f"Processed {sum(len(results) for results in processing_results.values())} podcasts"]
+                
+                if processing_results['new']:
+                    messages.append(f"Added {len(processing_results['new'])} new podcasts")
+                if processing_results['updated']:
+                    messages.append(f"Updated {len(processing_results['updated'])} existing podcasts")
+                if processing_results['skipped']:
+                    messages.append(f"Skipped {len(processing_results['skipped'])} podcasts")
+                if processing_results['error']:
+                    messages.append(f"Failed to process {len(processing_results['error'])} podcasts")
 
-                # Create compressed summary messages
-                total_processed = sum(len(results) for results in processing_results.values())
-                flash(f"Processed {total_processed} podcasts")
-
-                # Add detailed results but limit the amount of information
-                for status, results in processing_results.items():
-                    if results:  # Only show non-empty results
-                        message = compress_messages(results, status)
-                        if message:
-                            flash(message)
+                # Flash messages individually to avoid cookie size issues
+                for message in messages:
+                    flash(message)
 
             return redirect(url_for('upload_combined'))
 
