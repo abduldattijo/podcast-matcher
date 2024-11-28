@@ -10,9 +10,11 @@ import logging
 import psutil
 from functools import wraps
 import time
+import gc
 from utils import create_embedding, generate_score_reason, generate_mismatch_explanation, calculate_recency_score
 from database import supabase
 from bs4 import BeautifulSoup
+
 
 logger = logging.getLogger(__name__)
 
