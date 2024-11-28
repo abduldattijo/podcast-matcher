@@ -65,10 +65,7 @@ def create_app():
             SESSION_COOKIE_HTTPONLY=True,
             ALLOWED_EXTENSIONS={'txt', 'docx', 'html', 'csv'}
         )
-        @app.after_request
-        def clean_session(response):
-           app.session.modified = True
-           return response
+        
        
 
         # Ensure upload folder exists
