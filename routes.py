@@ -464,7 +464,7 @@ def init_routes(app):
             'updated': [],
             'skipped': [],
             'error': [],
-            'invalid_urls': []
+            'invalid': []
         }
         
         try:
@@ -486,34 +486,45 @@ def init_routes(app):
 
             if file:
                 # Read and validate CSV data
-                csv_data = file.read().decode('utf-8')
-                csv_reader = csv.DictReader(StringIO(csv_data))
-                rows = list(csv_reader)
-                
+                rows, error = read_csv_data(file)
+                if error:
+                    flash(error)
+                    return redirect(url_for('upload_combined'))
+
                 # Validate all rows first
                 valid_rows = []
-                for row in rows:
-                    validated_data = validate_podcast_row(row)
+                for row_number, row in enumerate(rows, start=1):
+                    validated_data, error = validate_podcast_row(row, row_number)
                     if validated_data:
                         valid_rows.append(validated_data)
                     else:
-                        rss_feed = row.get('RSS Feed', '')
-                        if not validate_url(rss_feed):
-                            processing_results['invalid_urls'].append(rss_feed)
-                        else:
-                            processing_results['error'].append(rss_feed)
+                        processing_results['invalid'].append({
+                            'row': row_number,
+                            'error': error,
+                            'rss_feed': row.get('RSS Feed', 'Unknown')
+                        })
+                        logger.warning(f"Row {row_number}: {error}")
 
                 if not valid_rows:
-                    flash("No valid podcast data found in CSV.")
+                    flash(f"No valid podcast data found in CSV. Found {len(processing_results['invalid'])} invalid entries.")
                     return redirect(url_for('upload_combined'))
 
                 # Process in chunks
                 CHUNK_SIZE = 5
-                for chunk in chunked_iterable(valid_rows, CHUNK_SIZE):
+                for i in range(0, len(valid_rows), CHUNK_SIZE):
+                    chunk = valid_rows[i:i + CHUNK_SIZE]
                     try:
                         # Get existing podcasts for this chunk
                         rss_feeds = [row['rss_feed'] for row in chunk]
-                        existing_by_rss = batch_check_existing_podcasts(supabase, rss_feeds)
+                        existing_podcasts = supabase.table('podcasts')\
+                            .select('*')\
+                            .in_('rss_feed', rss_feeds)\
+                            .execute()
+
+                        existing_by_rss = {
+                            podcast['rss_feed']: podcast 
+                            for podcast in existing_podcasts.data
+                        }
 
                         # Process each podcast in chunk
                         for validated_data in chunk:
@@ -561,23 +572,18 @@ def init_routes(app):
 
                 # Create summary messages
                 messages = []
-                
-                if processing_results['invalid_urls']:
-                    messages.append(f"Found {len(processing_results['invalid_urls'])} invalid RSS feed URLs")
-                    
                 if processing_results['new']:
                     messages.append(f"Added {len(processing_results['new'])} new podcasts")
-                    
                 if processing_results['updated']:
                     messages.append(f"Updated {len(processing_results['updated'])} existing podcasts")
-                    
                 if processing_results['skipped']:
                     messages.append(f"Skipped {len(processing_results['skipped'])} podcasts")
-                    
+                if processing_results['invalid']:
+                    messages.append(f"Found {len(processing_results['invalid'])} invalid entries")
                 if processing_results['error']:
                     messages.append(f"Failed to process {len(processing_results['error'])} podcasts")
 
-                # Flash messages individually to avoid cookie size issues
+                # Flash messages individually
                 for message in messages:
                     flash(message)
 
