@@ -18,7 +18,7 @@ from database import supabase
 from flask_cors import CORS
 from datetime import datetime
 from flask import request
-from flask import session
+
 # app.py
 
 
@@ -69,10 +69,7 @@ def create_app():
             ALLOWED_EXTENSIONS={'txt', 'docx', 'html', 'csv'}
         )
         
-        @app.after_request
-        def clean_session(response):
-            session.modified = True
-            return response
+        
         
        
 
