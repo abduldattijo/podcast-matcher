@@ -148,7 +148,7 @@ def init_routes(app):
     @app.route('/upload_podcast', methods=['POST'])
     def upload_podcast():
         try:
-            from scripts.main import process_podcast
+            from main import process_podcast
 
             client_id = request.form.get("client_id")
             if not client_id:
