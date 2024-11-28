@@ -43,12 +43,126 @@ def validate_url(url):
     except:
         return None
 
-def log_validation_summary(processing_results):
-    logger.info("Validation summary:")
-    logger.info(f"New: {len(processing_results['new'])}")
-    logger.info(f"Updated: {len(processing_results['updated'])}")
-    logger.info(f"Skipped: {len(processing_results['skipped'])}")
-    logger.info(f"Error: {len(processing_results['error'])}")
+def read_csv_data(file_obj):
+    """Read and pre-validate CSV data"""
+    try:
+        csv_data = file_obj.read().decode('utf-8')
+        reader = csv.DictReader(StringIO(csv_data))
+        
+        # Verify required columns exist
+        required_columns = {'RSS Feed', 'ListenScore', 'Global Rank'}
+        columns = set(reader.fieldnames) if reader.fieldnames else set()
+        missing_columns = required_columns - columns
+        
+        if missing_columns:
+            logger.error(f"Missing required columns: {missing_columns}")
+            return None, f"CSV is missing required columns: {', '.join(missing_columns)}"
+            
+        rows = list(reader)
+        logger.info(f"Read {len(rows)} rows from CSV")
+        return rows, None
+        
+    except Exception as e:
+        logger.error(f"Error reading CSV: {str(e)}")
+        return None, f"Error reading CSV file: {str(e)}"
+
+def validate_url(url):
+    """Validate and clean URL"""
+    if not url:
+        return None
+        
+    url = url.strip()
+    if not url:
+        return None
+        
+    # Handle URLs that might be wrapped in quotes
+    url = url.strip('"\'')
+    
+    # Add scheme if missing
+    if not url.startswith(('http://', 'https://')):
+        url = 'https://' + url
+        
+    try:
+        from urllib.parse import urlparse, quote
+        # Handle URLs with special characters
+        parsed = urlparse(url)
+        if not parsed.scheme or not parsed.netloc:
+            return None
+            
+        # Reconstruct URL with proper encoding
+        path = quote(parsed.path) if parsed.path else ''
+        query = quote(parsed.query, safe='=&') if parsed.query else ''
+        fragment = quote(parsed.fragment) if parsed.fragment else ''
+        
+        reconstructed = f"{parsed.scheme}://{parsed.netloc}{path}"
+        if query:
+            reconstructed += f"?{query}"
+        if fragment:
+            reconstructed += f"#{fragment}"
+            
+        return reconstructed
+    except Exception as e:
+        logger.warning(f"URL validation failed for '{url}': {str(e)}")
+        return None
+
+def validate_podcast_row(row, row_number):
+    """Validate and clean podcast row data with enhanced error handling"""
+    try:
+        # Validate RSS Feed (required field)
+        rss_feed = row.get('RSS Feed', '').strip()
+        if not rss_feed:
+            logger.warning(f"Row {row_number}: Empty RSS feed URL")
+            return None, "Empty RSS feed URL"
+
+        validated_url = validate_url(rss_feed)
+        if not validated_url:
+            logger.warning(f"Row {row_number}: Invalid RSS feed URL: {rss_feed}")
+            return None, f"Invalid RSS feed URL: {rss_feed}"
+
+        # Clean numeric values
+        try:
+            listen_score = int(clean_numeric_value(row.get('ListenScore', '0'), 0))
+            listen_score = max(0, min(listen_score, 100))
+        except ValueError as e:
+            logger.warning(f"Row {row_number}: Invalid ListenScore: {row.get('ListenScore')}")
+            listen_score = 0
+
+        try:
+            raw_rank = row.get('Global Rank', '0%')
+            rank_value = clean_numeric_value(raw_rank.strip('%'), 0)
+            global_rank = min(1.0, max(0.0, float(rank_value) / 100.0))
+        except ValueError as e:
+            logger.warning(f"Row {row_number}: Invalid Global Rank: {raw_rank}")
+            global_rank = 0.0
+
+        return {
+            "search_term": (row.get('Search Term') or '').strip()[:100],
+            "listennotes_url": validate_url(row.get('ListenNotes URL', '')) or '',
+            "listen_score": listen_score,
+            "global_rank": global_rank,
+            "rss_feed": validated_url
+        }, None
+
+    except Exception as e:
+        error_msg = f"Row {row_number}: {str(e)}"
+        logger.error(error_msg)
+        return None, error_msg
+
+def summarize_validation_results(results):
+    """Create a summary of validation results"""
+    summary = {
+        'total_rows': len(results['all_rows']),
+        'valid_rows': len(results['valid_rows']),
+        'invalid_rows': [],
+        'error_types': {}
+    }
+    
+    for row_num, error in results['errors']:
+        summary['invalid_rows'].append((row_num, error))
+        error_type = error.split(':')[0]
+        summary['error_types'][error_type] = summary['error_types'].get(error_type, 0) + 1
+        
+    return summary
 
 def compress_messages(podcasts, status):
     """Compress list of podcast names into a summary"""
