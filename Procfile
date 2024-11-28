@@ -1,2 +1,1 @@
-
-
+gunicorn --worker-class=gevent --worker-connections=2400 --workers=3 app:app
