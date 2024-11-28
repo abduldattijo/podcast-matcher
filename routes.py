@@ -7,11 +7,52 @@ from docx import Document
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
+import psutil
+from functools import wraps
+import time
 from utils import create_embedding, generate_score_reason, generate_mismatch_explanation, calculate_recency_score
 from database import supabase
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
+
+def monitor_memory(func):
+    """Decorator to monitor memory usage during function execution"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        process = psutil.Process()
+        before_mem = process.memory_info().rss
+        
+        try:
+            result = func(*args, **kwargs)
+            
+            after_mem = process.memory_info().rss
+            memory_used = (after_mem - before_mem) / 1024 / 1024  # Convert to MB
+            
+            if memory_used > 500:  # Alert if using more than 500MB
+                logger.warning(f"High memory usage detected in {func.__name__}: {memory_used:.2f}MB")
+            
+            return result
+            
+        except MemoryError:
+            logger.error(f"Memory error in {func.__name__}")
+            raise
+            
+    return wrapper
+
+def chunked_iterable(iterable, size):
+    """Helper function to chunk iterable into smaller pieces"""
+    it = iter(iterable)
+    while True:
+        chunk = []
+        try:
+            for _ in range(size):
+                chunk.append(next(it))
+            yield chunk
+        except StopIteration:
+            if chunk:
+                yield chunk
+            break
 
 def parse_embedding_string(embedding_str):
     """Parse embedding string into a list of floats."""
@@ -70,6 +111,7 @@ def init_routes(app):
             return jsonify({"error": str(e)}), 500
 
     @app.route('/upload_client', methods=['POST'])
+    @monitor_memory
     def upload_client():
         try:
             client_id = request.form.get("client_id")
@@ -108,10 +150,12 @@ def init_routes(app):
                         elif filename.endswith('.docx'):
                             doc = Document(filepath)
                             transcription = '\n'.join([paragraph.text for paragraph in doc.paragraphs])
+                            doc = None  # Clear document from memory
                         elif filename.endswith('.html'):
                             with open(filepath, 'r', encoding='utf-8') as f:
                                 html_content = f.read()
                             transcription = extract_text_from_html(html_content)
+                            html_content = None  # Clear HTML content from memory
                             if not transcription:
                                 transcription = "Error processing HTML file"
                         else:
@@ -131,6 +175,11 @@ def init_routes(app):
                             "embedding": str(embedding_list)
                         }).execute()
 
+                    # Clear variables from memory
+                    transcription = None
+                    embedding = None
+                    embedding_list = None
+
                     # Clean up uploaded file
                     try:
                         os.remove(filepath)
@@ -146,6 +195,7 @@ def init_routes(app):
             return redirect(url_for('upload_combined'))
 
     @app.route('/upload_podcast', methods=['POST'])
+    @monitor_memory
     def upload_podcast():
         try:
             from main import process_podcast
@@ -167,55 +217,66 @@ def init_routes(app):
             if file:
                 csv_data = file.read().decode('utf-8')
                 csv_reader = csv.DictReader(StringIO(csv_data))
+                rows = list(csv_reader)
                 
+                # Process in chunks of 10 podcasts at a time
+                CHUNK_SIZE = 10
                 new_podcasts = []
                 updated_podcasts = []
                 skipped_podcasts = []
+                
+                for chunk in chunked_iterable(rows, CHUNK_SIZE):
+                    for row in chunk:
+                        try:
+                            existing_podcast = supabase.table('podcasts')\
+                                .select('*')\
+                                .eq('rss_feed', row['RSS Feed'])\
+                                .eq('client_id', client_id)\
+                                .execute()
 
-                for row in csv_reader:
-                    try:
-                        existing_podcast = supabase.table('podcasts')\
-                            .select('*')\
-                            .eq('rss_feed', row['RSS Feed'])\
-                            .eq('client_id', client_id)\
-                            .execute()
+                            other_client_podcast = supabase.table('podcasts')\
+                                .select('*')\
+                                .eq('rss_feed', row['RSS Feed'])\
+                                .neq('client_id', client_id)\
+                                .execute()
 
-                        other_client_podcast = supabase.table('podcasts')\
-                            .select('*')\
-                            .eq('rss_feed', row['RSS Feed'])\
-                            .neq('client_id', client_id)\
-                            .execute()
-
-                        if existing_podcast.data:
-                            podcast = existing_podcast.data[0]
-                            if podcast['status'] != 'Done':
-                                process_podcast(podcast, supabase)
-                                updated_podcasts.append(podcast['title'] or row['RSS Feed'])
+                            if existing_podcast.data:
+                                podcast = existing_podcast.data[0]
+                                if podcast['status'] != 'Done':
+                                    process_podcast(podcast, supabase)
+                                    updated_podcasts.append(podcast['title'] or row['RSS Feed'])
+                                else:
+                                    skipped_podcasts.append(podcast['title'] or row['RSS Feed'])
                             else:
-                                skipped_podcasts.append(podcast['title'] or row['RSS Feed'])
-                        else:
-                            new_podcast = {
-                                "client_id": client_id,
-                                "search_term": row['Search Term'][:100],
-                                "listennotes_url": row['ListenNotes URL'][:255],
-                                "listen_score": int(row['ListenScore']),
-                                "global_rank": float(row['Global Rank'].strip('%')) / 100,
-                                "rss_feed": row['RSS Feed'][:255],
-                                "status": "New"
-                            }
-                            
-                            response = supabase.table('podcasts').insert(new_podcast).execute()
-                            new_podcast_data = response.data[0]
-                            
-                            process_podcast(new_podcast_data, supabase)
-                            new_podcasts.append(new_podcast_data['title'] or row['RSS Feed'])
+                                new_podcast = {
+                                    "client_id": client_id,
+                                    "search_term": row['Search Term'][:100],
+                                    "listennotes_url": row['ListenNotes URL'][:255],
+                                    "listen_score": int(row['ListenScore']),
+                                    "global_rank": float(row['Global Rank'].strip('%')) / 100,
+                                    "rss_feed": row['RSS Feed'][:255],
+                                    "status": "New"
+                                }
+                                
+                                response = supabase.table('podcasts').insert(new_podcast).execute()
+                                new_podcast_data = response.data[0]
+                                
+                                process_podcast(new_podcast_data, supabase)
+                                new_podcasts.append(new_podcast_data['title'] or row['RSS Feed'])
 
-                            if other_client_podcast.data:
-                                flash(f"Note: Podcast '{row['RSS Feed']}' also exists for another client")
+                                if other_client_podcast.data:
+                                    flash(f"Note: Podcast '{row['RSS Feed']}' also exists for another client")
 
-                    except Exception as e:
-                        logger.error(f"Error processing podcast row: {str(e)}")
-                        flash(f"Error processing podcast: {row['RSS Feed']}")
+                        except Exception as e:
+                            logger.error(f"Error processing podcast row: {str(e)}")
+                            flash(f"Error processing podcast: {row['RSS Feed']}")
+                        
+                        # Clear variables from memory
+                        existing_podcast = None
+                        other_client_podcast = None
+                        
+                    # Sleep briefly between chunks to allow memory cleanup
+                    time.sleep(0.1)
 
                 if new_podcasts:
                     flash(f"Added {len(new_podcasts)} new podcasts: {', '.join(new_podcasts)}")
@@ -232,6 +293,7 @@ def init_routes(app):
             return redirect(url_for('upload_combined'))
 
     @app.route('/match_podcasts')
+    @monitor_memory
     def match_podcasts():
         try:
             client_id = request.args.get("client_id")
@@ -303,20 +365,24 @@ def init_routes(app):
 
             podcast_embeddings = np.array([p['embedding'] for p in valid_podcasts])
 
-            # Get episodes for all valid podcasts
+            # Get episodes for all valid podcasts in chunks
             episode_ids = [p['id'] for p in valid_podcasts]
-            episodes = supabase.table('episodes')\
-                .select('*')\
-                .in_('podcast_id', episode_ids)\
-                .execute()
-
+            chunk_size = 50
             valid_episodes = []
-            for episode in episodes.data:
-                if episode.get('embedding'):
-                    embedding = parse_embedding_string(episode['embedding'])
-                    if embedding:
-                        episode['embedding'] = embedding
-                        valid_episodes.append(episode)
+            
+            for i in range(0, len(episode_ids), chunk_size):
+                chunk = episode_ids[i:i + chunk_size]
+                episodes = supabase.table('episodes')\
+                    .select('*')\
+                    .in_('podcast_id', chunk)\
+                    .execute()
+
+                for episode in episodes.data:
+                    if episode.get('embedding'):
+                        embedding = parse_embedding_string(episode['embedding'])
+                        if embedding:
+                            episode['embedding'] = embedding
+                            valid_episodes.append(episode)
 
             final_scores = []
             for podcast in valid_podcasts:
@@ -328,12 +394,17 @@ def init_routes(app):
                 relevance_score = float(relevance_scores.mean()) * 100
 
                 # Calculate guest fit score
+                # Calculate guest fit score
                 if podcast_episodes:
                     episode_embeddings = np.array([e['embedding'] for e in podcast_episodes])
                     episode_scores = cosine_similarity(client_embeddings, episode_embeddings)
                     guest_fit_score = float(episode_scores.mean()) * 100
                 else:
                     guest_fit_score = 0.0
+
+                # Clear episode data from memory
+                episode_embeddings = None
+                episode_scores = None
 
                 # Get audience score from listen_score
                 audience_score = float(podcast['listen_score']) if podcast.get('listen_score') is not None else 0.0
@@ -377,16 +448,27 @@ def init_routes(app):
                     "potential_mismatch": potential_mismatch
                 })
 
+                # Clear variables from memory
+                relevance_scores = None
+                podcast_episodes = None
+
             # Sort by aggregate score
             final_scores.sort(key=lambda x: x["aggregate_score"], reverse=True)
+            
+            # Clear remaining large objects from memory
+            client_embeddings = None
+            podcast_embeddings = None
+            valid_episodes = None
+            valid_podcasts = None
+            
             return jsonify(final_scores)
-        
         
         except Exception as e:
             logger.error(f"Error in match_podcasts: {str(e)}")
             return jsonify({"error": f"An error occurred during matching: {str(e)}"}), 500
 
     @app.route('/get_podcast_stats')
+    @monitor_memory
     def get_podcast_stats():
         try:
             client_id = request.args.get("client_id")
@@ -430,82 +512,8 @@ def init_routes(app):
             logger.error(f"Error getting podcast stats: {str(e)}")
             return jsonify({"error": str(e)}), 500
 
-    @app.route('/update_podcast_status', methods=['POST'])
-    def update_podcast_status():
-        try:
-            data = request.get_json()
-            podcast_id = data.get('podcast_id')
-            new_status = data.get('status')
-
-            if not podcast_id or not new_status:
-                return jsonify({"error": "Missing required fields"}), 400
-
-            supabase.table('podcasts')\
-                .update({"status": new_status})\
-                .eq('id', podcast_id)\
-                .execute()
-
-            return jsonify({"success": True, "message": "Status updated successfully"})
-
-        except Exception as e:
-            logger.error(f"Error updating podcast status: {str(e)}")
-            return jsonify({"error": str(e)}), 500
-
-    @app.route('/delete_podcast', methods=['POST'])
-    def delete_podcast():
-        try:
-            data = request.get_json()
-            podcast_id = data.get('podcast_id')
-
-            if not podcast_id:
-                return jsonify({"error": "Podcast ID is required"}), 400
-
-            # Delete associated episodes first
-            supabase.table('episodes')\
-                .delete()\
-                .eq('podcast_id', podcast_id)\
-                .execute()
-
-            # Then delete the podcast
-            supabase.table('podcasts')\
-                .delete()\
-                .eq('id', podcast_id)\
-                .execute()
-
-            return jsonify({
-                "success": True, 
-                "message": "Podcast and associated episodes deleted successfully"
-            })
-
-        except Exception as e:
-            logger.error(f"Error deleting podcast: {str(e)}")
-            return jsonify({"error": str(e)}), 500
-
-    @app.route('/clear_client_data', methods=['POST'])
-    def clear_client_data():
-        try:
-            data = request.get_json()
-            client_id = data.get('client_id')
-
-            if not client_id:
-                return jsonify({"error": "Client ID is required"}), 400
-
-            # Delete all client data
-            supabase.table('client_data')\
-                .delete()\
-                .eq('client_id', client_id)\
-                .execute()
-
-            return jsonify({
-                "success": True,
-                "message": "Client data cleared successfully"
-            })
-
-        except Exception as e:
-            logger.error(f"Error clearing client data: {str(e)}")
-            return jsonify({"error": str(e)}), 500
-
-    @app.route('/export_matches', methods=['GET'])
+    @app.route('/export_matches')
+    @monitor_memory
     def export_matches():
         try:
             client_id = request.args.get("client_id")
@@ -546,19 +554,22 @@ def init_routes(app):
                 'Last Updated'
             ])
 
-            # Write data
-            for match in matches.data:
-                writer.writerow([
-                    match.get('title', ''),
-                    match.get('listen_score', ''),
-                    f"{(match.get('global_rank', 0) * 100):.1f}%",
-                    match.get('categories', ''),
-                    match.get('contact_name', ''),
-                    match.get('contact_email', ''),
-                    match.get('listennotes_url', ''),
-                    match.get('rss_feed', ''),
-                    match.get('last_updated', '')
-                ])
+            # Write data in chunks
+            chunk_size = 100
+            for i in range(0, len(matches.data), chunk_size):
+                chunk = matches.data[i:i + chunk_size]
+                for match in chunk:
+                    writer.writerow([
+                        match.get('title', ''),
+                        match.get('listen_score', ''),
+                        f"{(match.get('global_rank', 0) * 100):.1f}%",
+                        match.get('categories', ''),
+                        match.get('contact_name', ''),
+                        match.get('contact_email', ''),
+                        match.get('listennotes_url', ''),
+                        match.get('rss_feed', ''),
+                        match.get('last_updated', '')
+                    ])
 
             # Create response
             from flask import Response
