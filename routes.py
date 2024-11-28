@@ -18,6 +18,36 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+def validate_podcast_row(row):
+    """Validate and clean podcast row data"""
+    try:
+        # Set default values for empty fields
+        listen_score = 0
+        if row.get('ListenScore'):
+            try:
+                listen_score = int(row['ListenScore'])
+            except ValueError:
+                listen_score = 0
+        
+        global_rank = 0.0
+        if row.get('Global Rank'):
+            try:
+                # Remove % sign and convert to decimal
+                global_rank = float(row['Global Rank'].strip('%')) / 100
+            except ValueError:
+                global_rank = 0.0
+        
+        return {
+            "search_term": (row.get('Search Term') or '')[:100],
+            "listennotes_url": (row.get('ListenNotes URL') or '')[:255],
+            "listen_score": listen_score,
+            "global_rank": global_rank,
+            "rss_feed": (row.get('RSS Feed') or '')[:255]
+        }
+    except Exception as e:
+        logger.error(f"Error validating row: {str(e)}")
+        return None
+
 def monitor_memory(func):
     """Decorator to monitor memory usage during function execution"""
     @wraps(func)
@@ -221,8 +251,15 @@ def init_routes(app):
                 csv_reader = csv.DictReader(StringIO(csv_data))
                 rows = list(csv_reader)
                 
+                # Skip rows with missing RSS feed
+                valid_rows = [row for row in rows if row.get('RSS Feed')]
+                
+                if not valid_rows:
+                    flash("No valid podcast data found in CSV.")
+                    return redirect(url_for('upload_combined'))
+                
                 # Get all RSS feeds at once
-                all_rss_feeds = [row['RSS Feed'] for row in rows]
+                all_rss_feeds = [row['RSS Feed'] for row in valid_rows]
                 
                 # Batch query existing podcasts
                 existing_podcasts = supabase.table('podcasts')\
@@ -241,14 +278,21 @@ def init_routes(app):
                 new_podcasts = []
                 updated_podcasts = []
                 skipped_podcasts = []
+                error_podcasts = []
                 
-                for i in range(0, len(rows), CHUNK_SIZE):
-                    chunk = rows[i:i + CHUNK_SIZE]
+                for i in range(0, len(valid_rows), CHUNK_SIZE):
+                    chunk = valid_rows[i:i + CHUNK_SIZE]
                     
                     for row in chunk:
                         try:
                             rss_feed = row['RSS Feed']
                             existing = existing_by_rss.get(rss_feed)
+
+                            # Validate and clean row data
+                            validated_data = validate_podcast_row(row)
+                            if not validated_data:
+                                error_podcasts.append(rss_feed)
+                                continue
 
                             if existing:
                                 if existing['client_id'] == client_id:
@@ -262,11 +306,11 @@ def init_routes(app):
                             else:
                                 new_podcast = {
                                     "client_id": client_id,
-                                    "search_term": row['Search Term'][:100],
-                                    "listennotes_url": row['ListenNotes URL'][:255],
-                                    "listen_score": int(row['ListenScore']),
-                                    "global_rank": float(row['Global Rank'].strip('%')) / 100,
-                                    "rss_feed": rss_feed[:255],
+                                    "search_term": validated_data["search_term"],
+                                    "listennotes_url": validated_data["listennotes_url"],
+                                    "listen_score": validated_data["listen_score"],
+                                    "global_rank": validated_data["global_rank"],
+                                    "rss_feed": validated_data["rss_feed"],
                                     "status": "New"
                                 }
                                 
@@ -278,24 +322,32 @@ def init_routes(app):
 
                         except Exception as e:
                             logger.error(f"Error processing podcast row: {str(e)}")
-                            flash(f"Error processing podcast: {row['RSS Feed']}")
+                            error_podcasts.append(row.get('RSS Feed', 'Unknown RSS Feed'))
 
                     # Clear memory between chunks
                     gc.collect()
                     time.sleep(0.5)  # Brief pause between chunks
 
+                # Create summary messages
+                messages = []
                 if new_podcasts:
-                    flash(f"Added {len(new_podcasts)} new podcasts: {', '.join(new_podcasts[:5])}...")
+                    messages.append(f"Added {len(new_podcasts)} new podcasts: {', '.join(new_podcasts[:5])}...")
                 if updated_podcasts:
-                    flash(f"Updated {len(updated_podcasts)} existing podcasts: {', '.join(updated_podcasts[:5])}...")
+                    messages.append(f"Updated {len(updated_podcasts)} existing podcasts: {', '.join(updated_podcasts[:5])}...")
                 if skipped_podcasts:
-                    flash(f"Skipped {len(skipped_podcasts)} already processed podcasts: {', '.join(skipped_podcasts[:5])}...")
+                    messages.append(f"Skipped {len(skipped_podcasts)} already processed podcasts.")
+                if error_podcasts:
+                    messages.append(f"Failed to process {len(error_podcasts)} podcasts due to invalid data.")
+
+                # Flash messages in chunks to avoid cookie size limit
+                for message in messages:
+                    flash(message)
 
             return redirect(url_for('upload_combined'))
 
         except Exception as e:
             logger.error(f"Error in upload_podcast: {str(e)}")
-            flash(f"Error: {str(e)}")
+            flash(f"Error processing podcasts: {str(e)}")
             return redirect(url_for('upload_combined'))
 
     @app.route('/match_podcasts')
