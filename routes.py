@@ -7,291 +7,11 @@ from docx import Document
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
-import psutil
-from functools import wraps
-import time
-import gc
 from utils import create_embedding, generate_score_reason, generate_mismatch_explanation, calculate_recency_score
 from database import supabase
 from bs4 import BeautifulSoup
 
-
 logger = logging.getLogger(__name__)
-
-def clean_numeric_value(raw_score, default_value):
-    return ''.join(filter(str.isdigit, raw_score)) or default_value
-
-def validate_url(url):
-    """Validate and clean URL"""
-    if not url:
-        return None
-        
-    url = url.strip()
-    if not url:
-        return None
-        
-    # Add scheme if missing
-    if not url.startswith(('http://', 'https://')):
-        url = 'https://' + url
-        
-    try:
-        from urllib.parse import urlparse
-        result = urlparse(url)
-        if not result.scheme or not result.netloc:
-            return None
-        return url
-    except:
-        return None
-
-def read_csv_data(file_obj):
-    """Read and pre-validate CSV data"""
-    try:
-        csv_data = file_obj.read().decode('utf-8')
-        reader = csv.DictReader(StringIO(csv_data))
-        
-        # Verify required columns exist
-        required_columns = {'RSS Feed', 'ListenScore', 'Global Rank'}
-        columns = set(reader.fieldnames) if reader.fieldnames else set()
-        missing_columns = required_columns - columns
-        
-        if missing_columns:
-            logger.error(f"Missing required columns: {missing_columns}")
-            return None, f"CSV is missing required columns: {', '.join(missing_columns)}"
-            
-        rows = list(reader)
-        logger.info(f"Read {len(rows)} rows from CSV")
-        return rows, None
-        
-    except Exception as e:
-        logger.error(f"Error reading CSV: {str(e)}")
-        return None, f"Error reading CSV file: {str(e)}"
-
-def validate_url(url):
-    """Validate and clean URL"""
-    if not url:
-        return None
-        
-    url = url.strip()
-    if not url:
-        return None
-        
-    # Handle URLs that might be wrapped in quotes
-    url = url.strip('"\'')
-    
-    # Add scheme if missing
-    if not url.startswith(('http://', 'https://')):
-        url = 'https://' + url
-        
-    try:
-        from urllib.parse import urlparse, quote
-        # Handle URLs with special characters
-        parsed = urlparse(url)
-        if not parsed.scheme or not parsed.netloc:
-            return None
-            
-        # Reconstruct URL with proper encoding
-        path = quote(parsed.path) if parsed.path else ''
-        query = quote(parsed.query, safe='=&') if parsed.query else ''
-        fragment = quote(parsed.fragment) if parsed.fragment else ''
-        
-        reconstructed = f"{parsed.scheme}://{parsed.netloc}{path}"
-        if query:
-            reconstructed += f"?{query}"
-        if fragment:
-            reconstructed += f"#{fragment}"
-            
-        return reconstructed
-    except Exception as e:
-        logger.warning(f"URL validation failed for '{url}': {str(e)}")
-        return None
-
-def validate_podcast_row(row, row_number):
-    """Validate and clean podcast row data with enhanced error handling"""
-    try:
-        # Validate RSS Feed (required field)
-        rss_feed = row.get('RSS Feed', '').strip()
-        if not rss_feed:
-            logger.warning(f"Row {row_number}: Empty RSS feed URL")
-            return None, "Empty RSS feed URL"
-
-        validated_url = validate_url(rss_feed)
-        if not validated_url:
-            logger.warning(f"Row {row_number}: Invalid RSS feed URL: {rss_feed}")
-            return None, f"Invalid RSS feed URL: {rss_feed}"
-
-        # Clean numeric values
-        try:
-            listen_score = int(clean_numeric_value(row.get('ListenScore', '0'), 0))
-            listen_score = max(0, min(listen_score, 100))
-        except ValueError as e:
-            logger.warning(f"Row {row_number}: Invalid ListenScore: {row.get('ListenScore')}")
-            listen_score = 0
-
-        try:
-            raw_rank = row.get('Global Rank', '0%')
-            rank_value = clean_numeric_value(raw_rank.strip('%'), 0)
-            global_rank = min(1.0, max(0.0, float(rank_value) / 100.0))
-        except ValueError as e:
-            logger.warning(f"Row {row_number}: Invalid Global Rank: {raw_rank}")
-            global_rank = 0.0
-
-        return {
-            "search_term": (row.get('Search Term') or '').strip()[:100],
-            "listennotes_url": validate_url(row.get('ListenNotes URL', '')) or '',
-            "listen_score": listen_score,
-            "global_rank": global_rank,
-            "rss_feed": validated_url
-        }, None
-
-    except Exception as e:
-        error_msg = f"Row {row_number}: {str(e)}"
-        logger.error(error_msg)
-        return None, error_msg
-
-def summarize_validation_results(results):
-    """Create a summary of validation results"""
-    summary = {
-        'total_rows': len(results['all_rows']),
-        'valid_rows': len(results['valid_rows']),
-        'invalid_rows': [],
-        'error_types': {}
-    }
-    
-    for row_num, error in results['errors']:
-        summary['invalid_rows'].append((row_num, error))
-        error_type = error.split(':')[0]
-        summary['error_types'][error_type] = summary['error_types'].get(error_type, 0) + 1
-        
-    return summary
-
-def compress_messages(podcasts, status):
-    """Compress list of podcast names into a summary"""
-    if not podcasts:
-        return None
-    count = len(podcasts)
-    if count <= 3:
-        names = ', '.join(podcasts)
-    else:
-        names = f"{', '.join(podcasts[:3])} and {count - 3} more"
-    
-    status_messages = {
-        'new': f"Added {count} new podcasts: {names}",
-        'updated': f"Updated {count} existing podcasts: {names}",
-        'skipped': f"Skipped {count} podcasts",
-        'error': f"Failed to process {count} podcasts"
-    }
-    return status_messages.get(status)
-
-def clean_numeric_value(value, default=0):
-    """Clean and convert numeric values with enhanced error handling"""
-    if value is None:
-        return default
-    
-    try:
-        # Convert to string first
-        str_value = str(value).strip()
-        # Remove any % signs
-        str_value = str_value.replace('%', '')
-        
-        if not str_value or str_value.lower() == 'nan':
-            return default
-            
-        # Try to convert to float first
-        float_value = float(str_value)
-        return float_value
-    except (ValueError, TypeError):
-        return default
-
-def validate_podcast_row(row, row_number):
-    """Validate and clean podcast row data with enhanced error handling"""
-    try:
-        # Validate RSS Feed (required field)
-        rss_feed = row.get('RSS Feed', '').strip()
-        if not rss_feed:
-            logger.warning(f"Row {row_number}: Empty RSS feed URL")
-            return None, "Empty RSS feed URL"
-
-        validated_url = validate_url(rss_feed)
-        if not validated_url:
-            logger.warning(f"Row {row_number}: Invalid RSS feed URL: {rss_feed}")
-            return None, f"Invalid RSS feed URL: {rss_feed}"
-
-        # Clean listen score
-        raw_score = row.get('ListenScore', '0')
-        try:
-            listen_score = clean_numeric_value(raw_score, default=0)
-            listen_score = int(max(0, min(listen_score, 100)))
-        except (ValueError, TypeError) as e:
-            logger.warning(f"Row {row_number}: Invalid ListenScore '{raw_score}', defaulting to 0")
-            listen_score = 0
-
-        # Clean global rank
-        raw_rank = row.get('Global Rank', '0%')
-        try:
-            # Remove % and convert to float
-            rank_value = clean_numeric_value(raw_rank, default=0)
-            # Convert to decimal (e.g., 50% -> 0.5)
-            global_rank = min(1.0, max(0.0, rank_value / 100.0))
-        except (ValueError, TypeError) as e:
-            logger.warning(f"Row {row_number}: Invalid Global Rank '{raw_rank}', defaulting to 0")
-            global_rank = 0.0
-
-        return {
-            "search_term": (row.get('Search Term') or '').strip()[:100],
-            "listennotes_url": validate_url(row.get('ListenNotes URL', '')) or '',
-            "listen_score": listen_score,
-            "global_rank": global_rank,
-            "rss_feed": validated_url
-        }, None
-
-    except Exception as e:
-        error_msg = f"Row {row_number}: {str(e)}"
-        logger.error(error_msg)
-        return None, error_msg
-
-def debug_row_data(row, row_number):
-    """Debug function to log row data"""
-    logger.debug(f"Row {row_number} data:")
-    for key, value in row.items():
-        logger.debug(f"  {key}: {value} (type: {type(value)})")
-
-def monitor_memory(func):
-    """Decorator to monitor memory usage during function execution"""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        process = psutil.Process()
-        before_mem = process.memory_info().rss
-        
-        try:
-            result = func(*args, **kwargs)
-            
-            after_mem = process.memory_info().rss
-            memory_used = (after_mem - before_mem) / 1024 / 1024  # Convert to MB
-            
-            if memory_used > 500:  # Alert if using more than 500MB
-                logger.warning(f"High memory usage detected in {func.__name__}: {memory_used:.2f}MB")
-            
-            return result
-            
-        except MemoryError:
-            logger.error(f"Memory error in {func.__name__}")
-            raise
-            
-    return wrapper
-
-def chunked_iterable(iterable, size):
-    """Helper function to chunk iterable into smaller pieces"""
-    it = iter(iterable)
-    while True:
-        chunk = []
-        try:
-            for _ in range(size):
-                chunk.append(next(it))
-            yield chunk
-        except StopIteration:
-            if chunk:
-                yield chunk
-            break
 
 def parse_embedding_string(embedding_str):
     """Parse embedding string into a list of floats."""
@@ -323,29 +43,6 @@ def extract_text_from_html(html_content):
     except Exception as e:
         logger.error(f"Error extracting text from HTML: {str(e)}")
         return None
-    
-def batch_check_existing_podcasts(supabase, rss_feeds):
-    """Check for existing podcasts with valid RSS feeds"""
-    try:
-        # Filter out empty or invalid URLs
-        valid_feeds = [feed for feed in rss_feeds if validate_url(feed)]
-        
-        if not valid_feeds:
-            return {}
-            
-        # Query existing podcasts
-        existing_podcasts = supabase.table('podcasts')\
-            .select('*')\
-            .in_('rss_feed', valid_feeds)\
-            .execute()
-
-        return {
-            podcast['rss_feed']: podcast 
-            for podcast in existing_podcasts.data
-        }
-    except Exception as e:
-        logger.error(f"Error checking existing podcasts: {str(e)}")
-        return {}    
 
 def init_routes(app):
     @app.route('/')
@@ -373,7 +70,6 @@ def init_routes(app):
             return jsonify({"error": str(e)}), 500
 
     @app.route('/upload_client', methods=['POST'])
-    @monitor_memory
     def upload_client():
         try:
             client_id = request.form.get("client_id")
@@ -412,12 +108,10 @@ def init_routes(app):
                         elif filename.endswith('.docx'):
                             doc = Document(filepath)
                             transcription = '\n'.join([paragraph.text for paragraph in doc.paragraphs])
-                            doc = None  # Clear document from memory
                         elif filename.endswith('.html'):
                             with open(filepath, 'r', encoding='utf-8') as f:
                                 html_content = f.read()
                             transcription = extract_text_from_html(html_content)
-                            html_content = None  # Clear HTML content from memory
                             if not transcription:
                                 transcription = "Error processing HTML file"
                         else:
@@ -437,11 +131,6 @@ def init_routes(app):
                             "embedding": str(embedding_list)
                         }).execute()
 
-                    # Clear variables from memory
-                    transcription = None
-                    embedding = None
-                    embedding_list = None
-
                     # Clean up uploaded file
                     try:
                         os.remove(filepath)
@@ -457,18 +146,9 @@ def init_routes(app):
             return redirect(url_for('upload_combined'))
 
     @app.route('/upload_podcast', methods=['POST'])
-    @monitor_memory
     def upload_podcast():
-        processing_results = {
-            'new': [],
-            'updated': [],
-            'skipped': [],
-            'error': [],
-            'invalid': []
-        }
-        
         try:
-            from main import process_podcast
+            from scripts.main import process_podcast
 
             client_id = request.form.get("client_id")
             if not client_id:
@@ -485,117 +165,73 @@ def init_routes(app):
                 return redirect(url_for('upload_combined'))
 
             if file:
-                # Read and validate CSV data
-                rows, error = read_csv_data(file)
-                if error:
-                    flash(error)
-                    return redirect(url_for('upload_combined'))
+                csv_data = file.read().decode('utf-8')
+                csv_reader = csv.DictReader(StringIO(csv_data))
+                
+                new_podcasts = []
+                updated_podcasts = []
+                skipped_podcasts = []
 
-                # Validate all rows first
-                valid_rows = []
-                for row_number, row in enumerate(rows, start=1):
-                    validated_data, error = validate_podcast_row(row, row_number)
-                    if validated_data:
-                        valid_rows.append(validated_data)
-                    else:
-                        processing_results['invalid'].append({
-                            'row': row_number,
-                            'error': error,
-                            'rss_feed': row.get('RSS Feed', 'Unknown')
-                        })
-                        logger.warning(f"Row {row_number}: {error}")
-
-                if not valid_rows:
-                    flash(f"No valid podcast data found in CSV. Found {len(processing_results['invalid'])} invalid entries.")
-                    return redirect(url_for('upload_combined'))
-
-                # Process in chunks
-                CHUNK_SIZE = 5
-                for i in range(0, len(valid_rows), CHUNK_SIZE):
-                    chunk = valid_rows[i:i + CHUNK_SIZE]
+                for row in csv_reader:
                     try:
-                        # Get existing podcasts for this chunk
-                        rss_feeds = [row['rss_feed'] for row in chunk]
-                        existing_podcasts = supabase.table('podcasts')\
+                        existing_podcast = supabase.table('podcasts')\
                             .select('*')\
-                            .in_('rss_feed', rss_feeds)\
+                            .eq('rss_feed', row['RSS Feed'])\
+                            .eq('client_id', client_id)\
                             .execute()
 
-                        existing_by_rss = {
-                            podcast['rss_feed']: podcast 
-                            for podcast in existing_podcasts.data
-                        }
+                        other_client_podcast = supabase.table('podcasts')\
+                            .select('*')\
+                            .eq('rss_feed', row['RSS Feed'])\
+                            .neq('client_id', client_id)\
+                            .execute()
 
-                        # Process each podcast in chunk
-                        for validated_data in chunk:
-                            try:
-                                rss_feed = validated_data['rss_feed']
-                                existing = existing_by_rss.get(rss_feed)
+                        if existing_podcast.data:
+                            podcast = existing_podcast.data[0]
+                            if podcast['status'] != 'Done':
+                                process_podcast(podcast, supabase)
+                                updated_podcasts.append(podcast['title'] or row['RSS Feed'])
+                            else:
+                                skipped_podcasts.append(podcast['title'] or row['RSS Feed'])
+                        else:
+                            new_podcast = {
+                                "client_id": client_id,
+                                "search_term": row['Search Term'][:100],
+                                "listennotes_url": row['ListenNotes URL'][:255],
+                                "listen_score": int(row['ListenScore']),
+                                "global_rank": float(row['Global Rank'].strip('%')) / 100,
+                                "rss_feed": row['RSS Feed'][:255],
+                                "status": "New"
+                            }
+                            
+                            response = supabase.table('podcasts').insert(new_podcast).execute()
+                            new_podcast_data = response.data[0]
+                            
+                            process_podcast(new_podcast_data, supabase)
+                            new_podcasts.append(new_podcast_data['title'] or row['RSS Feed'])
 
-                                if existing:
-                                    if existing['client_id'] == client_id:
-                                        if existing['status'] != 'Done':
-                                            process_podcast(existing, supabase)
-                                            processing_results['updated'].append(existing['title'] or rss_feed)
-                                        else:
-                                            processing_results['skipped'].append(existing['title'] or rss_feed)
-                                    continue
-
-                                # Create new podcast
-                                new_podcast = {
-                                    "client_id": client_id,
-                                    "search_term": validated_data["search_term"],
-                                    "listennotes_url": validated_data["listennotes_url"],
-                                    "listen_score": validated_data["listen_score"],
-                                    "global_rank": validated_data["global_rank"],
-                                    "rss_feed": validated_data["rss_feed"],
-                                    "status": "New"
-                                }
-
-                                response = supabase.table('podcasts').insert(new_podcast).execute()
-                                new_podcast_data = response.data[0]
-                                
-                                process_podcast(new_podcast_data, supabase)
-                                processing_results['new'].append(new_podcast_data['title'] or rss_feed)
-
-                            except Exception as e:
-                                logger.error(f"Error processing podcast {rss_feed}: {str(e)}")
-                                processing_results['error'].append(rss_feed)
-
-                        # Memory cleanup after each chunk
-                        gc.collect()
-                        time.sleep(0.5)
+                            if other_client_podcast.data:
+                                flash(f"Note: Podcast '{row['RSS Feed']}' also exists for another client")
 
                     except Exception as e:
-                        logger.error(f"Error processing chunk: {str(e)}")
-                        continue
+                        logger.error(f"Error processing podcast row: {str(e)}")
+                        flash(f"Error processing podcast: {row['RSS Feed']}")
 
-                # Create summary messages
-                messages = []
-                if processing_results['new']:
-                    messages.append(f"Added {len(processing_results['new'])} new podcasts")
-                if processing_results['updated']:
-                    messages.append(f"Updated {len(processing_results['updated'])} existing podcasts")
-                if processing_results['skipped']:
-                    messages.append(f"Skipped {len(processing_results['skipped'])} podcasts")
-                if processing_results['invalid']:
-                    messages.append(f"Found {len(processing_results['invalid'])} invalid entries")
-                if processing_results['error']:
-                    messages.append(f"Failed to process {len(processing_results['error'])} podcasts")
-
-                # Flash messages individually
-                for message in messages:
-                    flash(message)
+                if new_podcasts:
+                    flash(f"Added {len(new_podcasts)} new podcasts: {', '.join(new_podcasts)}")
+                if updated_podcasts:
+                    flash(f"Updated {len(updated_podcasts)} existing podcasts: {', '.join(updated_podcasts)}")
+                if skipped_podcasts:
+                    flash(f"Skipped {len(skipped_podcasts)} already processed podcasts: {', '.join(skipped_podcasts)}")
 
             return redirect(url_for('upload_combined'))
 
         except Exception as e:
             logger.error(f"Error in upload_podcast: {str(e)}")
-            flash(f"Error processing podcasts: {str(e)}")
+            flash(f"Error: {str(e)}")
             return redirect(url_for('upload_combined'))
 
     @app.route('/match_podcasts')
-    @monitor_memory
     def match_podcasts():
         try:
             client_id = request.args.get("client_id")
@@ -667,24 +303,20 @@ def init_routes(app):
 
             podcast_embeddings = np.array([p['embedding'] for p in valid_podcasts])
 
-            # Get episodes for all valid podcasts in chunks
+            # Get episodes for all valid podcasts
             episode_ids = [p['id'] for p in valid_podcasts]
-            chunk_size = 50
-            valid_episodes = []
-            
-            for i in range(0, len(episode_ids), chunk_size):
-                chunk = episode_ids[i:i + chunk_size]
-                episodes = supabase.table('episodes')\
-                    .select('*')\
-                    .in_('podcast_id', chunk)\
-                    .execute()
+            episodes = supabase.table('episodes')\
+                .select('*')\
+                .in_('podcast_id', episode_ids)\
+                .execute()
 
-                for episode in episodes.data:
-                    if episode.get('embedding'):
-                        embedding = parse_embedding_string(episode['embedding'])
-                        if embedding:
-                            episode['embedding'] = embedding
-                            valid_episodes.append(episode)
+            valid_episodes = []
+            for episode in episodes.data:
+                if episode.get('embedding'):
+                    embedding = parse_embedding_string(episode['embedding'])
+                    if embedding:
+                        episode['embedding'] = embedding
+                        valid_episodes.append(episode)
 
             final_scores = []
             for podcast in valid_podcasts:
@@ -696,17 +328,12 @@ def init_routes(app):
                 relevance_score = float(relevance_scores.mean()) * 100
 
                 # Calculate guest fit score
-                # Calculate guest fit score
                 if podcast_episodes:
                     episode_embeddings = np.array([e['embedding'] for e in podcast_episodes])
                     episode_scores = cosine_similarity(client_embeddings, episode_embeddings)
                     guest_fit_score = float(episode_scores.mean()) * 100
                 else:
                     guest_fit_score = 0.0
-
-                # Clear episode data from memory
-                episode_embeddings = None
-                episode_scores = None
 
                 # Get audience score from listen_score
                 audience_score = float(podcast['listen_score']) if podcast.get('listen_score') is not None else 0.0
@@ -750,27 +377,16 @@ def init_routes(app):
                     "potential_mismatch": potential_mismatch
                 })
 
-                # Clear variables from memory
-                relevance_scores = None
-                podcast_episodes = None
-
             # Sort by aggregate score
             final_scores.sort(key=lambda x: x["aggregate_score"], reverse=True)
-            
-            # Clear remaining large objects from memory
-            client_embeddings = None
-            podcast_embeddings = None
-            valid_episodes = None
-            valid_podcasts = None
-            
             return jsonify(final_scores)
+        
         
         except Exception as e:
             logger.error(f"Error in match_podcasts: {str(e)}")
             return jsonify({"error": f"An error occurred during matching: {str(e)}"}), 500
 
     @app.route('/get_podcast_stats')
-    @monitor_memory
     def get_podcast_stats():
         try:
             client_id = request.args.get("client_id")
@@ -814,8 +430,82 @@ def init_routes(app):
             logger.error(f"Error getting podcast stats: {str(e)}")
             return jsonify({"error": str(e)}), 500
 
-    @app.route('/export_matches')
-    @monitor_memory
+    @app.route('/update_podcast_status', methods=['POST'])
+    def update_podcast_status():
+        try:
+            data = request.get_json()
+            podcast_id = data.get('podcast_id')
+            new_status = data.get('status')
+
+            if not podcast_id or not new_status:
+                return jsonify({"error": "Missing required fields"}), 400
+
+            supabase.table('podcasts')\
+                .update({"status": new_status})\
+                .eq('id', podcast_id)\
+                .execute()
+
+            return jsonify({"success": True, "message": "Status updated successfully"})
+
+        except Exception as e:
+            logger.error(f"Error updating podcast status: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/delete_podcast', methods=['POST'])
+    def delete_podcast():
+        try:
+            data = request.get_json()
+            podcast_id = data.get('podcast_id')
+
+            if not podcast_id:
+                return jsonify({"error": "Podcast ID is required"}), 400
+
+            # Delete associated episodes first
+            supabase.table('episodes')\
+                .delete()\
+                .eq('podcast_id', podcast_id)\
+                .execute()
+
+            # Then delete the podcast
+            supabase.table('podcasts')\
+                .delete()\
+                .eq('id', podcast_id)\
+                .execute()
+
+            return jsonify({
+                "success": True, 
+                "message": "Podcast and associated episodes deleted successfully"
+            })
+
+        except Exception as e:
+            logger.error(f"Error deleting podcast: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/clear_client_data', methods=['POST'])
+    def clear_client_data():
+        try:
+            data = request.get_json()
+            client_id = data.get('client_id')
+
+            if not client_id:
+                return jsonify({"error": "Client ID is required"}), 400
+
+            # Delete all client data
+            supabase.table('client_data')\
+                .delete()\
+                .eq('client_id', client_id)\
+                .execute()
+
+            return jsonify({
+                "success": True,
+                "message": "Client data cleared successfully"
+            })
+
+        except Exception as e:
+            logger.error(f"Error clearing client data: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/export_matches', methods=['GET'])
     def export_matches():
         try:
             client_id = request.args.get("client_id")
@@ -856,22 +546,19 @@ def init_routes(app):
                 'Last Updated'
             ])
 
-            # Write data in chunks
-            chunk_size = 100
-            for i in range(0, len(matches.data), chunk_size):
-                chunk = matches.data[i:i + chunk_size]
-                for match in chunk:
-                    writer.writerow([
-                        match.get('title', ''),
-                        match.get('listen_score', ''),
-                        f"{(match.get('global_rank', 0) * 100):.1f}%",
-                        match.get('categories', ''),
-                        match.get('contact_name', ''),
-                        match.get('contact_email', ''),
-                        match.get('listennotes_url', ''),
-                        match.get('rss_feed', ''),
-                        match.get('last_updated', '')
-                    ])
+            # Write data
+            for match in matches.data:
+                writer.writerow([
+                    match.get('title', ''),
+                    match.get('listen_score', ''),
+                    f"{(match.get('global_rank', 0) * 100):.1f}%",
+                    match.get('categories', ''),
+                    match.get('contact_name', ''),
+                    match.get('contact_email', ''),
+                    match.get('listennotes_url', ''),
+                    match.get('rss_feed', ''),
+                    match.get('last_updated', '')
+                ])
 
             # Create response
             from flask import Response
