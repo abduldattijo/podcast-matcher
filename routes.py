@@ -18,6 +18,31 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+def clean_numeric_value(raw_score, default_value):
+    return ''.join(filter(str.isdigit, raw_score)) or default_value
+
+def validate_url(url):
+    """Validate and clean URL"""
+    if not url:
+        return None
+        
+    url = url.strip()
+    if not url:
+        return None
+        
+    # Add scheme if missing
+    if not url.startswith(('http://', 'https://')):
+        url = 'https://' + url
+        
+    try:
+        from urllib.parse import urlparse
+        result = urlparse(url)
+        if not result.scheme or not result.netloc:
+            return None
+        return url
+    except:
+        return None
+
 def log_validation_summary(processing_results):
     logger.info("Validation summary:")
     logger.info(f"New: {len(processing_results['new'])}")
@@ -44,33 +69,52 @@ def compress_messages(podcasts, status):
     return status_messages.get(status)
 
 def validate_podcast_row(row):
-    """Validate and clean podcast row data"""
+    """Validate and clean podcast row data with enhanced error handling"""
     try:
-        # Set default values for empty fields
+        # Validate RSS Feed (required field)
+        rss_feed = validate_url(row.get('RSS Feed', ''))
+        if not rss_feed:
+            logger.warning("Invalid or missing RSS feed URL")
+            return None
+
+        # Validate ListenNotes URL
+        listennotes_url = validate_url(row.get('ListenNotes URL', ''))
+        if not listennotes_url:
+            listennotes_url = ''  # Optional field, can be empty
+
+        # Clean listen score
         listen_score = 0
-        if row.get('ListenScore'):
+        raw_score = row.get('ListenScore', '0')
+        if raw_score:
             try:
-                listen_score = int(row['ListenScore'])
+                listen_score = int(clean_numeric_value(raw_score, 0))
+                listen_score = max(0, min(listen_score, 100))
             except ValueError:
+                logger.warning(f"Invalid listen score format: {raw_score}, defaulting to 0")
                 listen_score = 0
-        
+
+        # Clean global rank
         global_rank = 0.0
-        if row.get('Global Rank'):
+        raw_rank = row.get('Global Rank', '0%')
+        if raw_rank:
             try:
-                # Remove % sign and convert to decimal
-                global_rank = float(row['Global Rank'].strip('%')) / 100
+                rank_value = clean_numeric_value(raw_rank.strip('%'), 0)
+                global_rank = rank_value / 100.0
+                global_rank = max(0.0, min(global_rank, 1.0))
             except ValueError:
+                logger.warning(f"Invalid global rank format: {raw_rank}, defaulting to 0")
                 global_rank = 0.0
-        
+
         return {
-            "search_term": (row.get('Search Term') or '')[:100],
-            "listennotes_url": (row.get('ListenNotes URL') or '')[:255],
+            "search_term": (row.get('Search Term') or '').strip()[:100],
+            "listennotes_url": listennotes_url[:255],
             "listen_score": listen_score,
             "global_rank": global_rank,
-            "rss_feed": (row.get('RSS Feed') or '')[:255]
+            "rss_feed": rss_feed[:255]
         }
+
     except Exception as e:
-        logger.error(f"Error validating row: {str(e)}")
+        logger.error(f"Error validating row data: {str(e)}")
         return None
 
 def monitor_memory(func):
@@ -141,6 +185,29 @@ def extract_text_from_html(html_content):
     except Exception as e:
         logger.error(f"Error extracting text from HTML: {str(e)}")
         return None
+    
+def batch_check_existing_podcasts(supabase, rss_feeds):
+    """Check for existing podcasts with valid RSS feeds"""
+    try:
+        # Filter out empty or invalid URLs
+        valid_feeds = [feed for feed in rss_feeds if validate_url(feed)]
+        
+        if not valid_feeds:
+            return {}
+            
+        # Query existing podcasts
+        existing_podcasts = supabase.table('podcasts')\
+            .select('*')\
+            .in_('rss_feed', valid_feeds)\
+            .execute()
+
+        return {
+            podcast['rss_feed']: podcast 
+            for podcast in existing_podcasts.data
+        }
+    except Exception as e:
+        logger.error(f"Error checking existing podcasts: {str(e)}")
+        return {}    
 
 def init_routes(app):
     @app.route('/')
@@ -258,7 +325,8 @@ def init_routes(app):
             'new': [],
             'updated': [],
             'skipped': [],
-            'error': []
+            'error': [],
+            'invalid_urls': []
         }
         
         try:
@@ -291,7 +359,11 @@ def init_routes(app):
                     if validated_data:
                         valid_rows.append(validated_data)
                     else:
-                        processing_results['error'].append(row.get('RSS Feed', 'Unknown RSS Feed'))
+                        rss_feed = row.get('RSS Feed', '')
+                        if not validate_url(rss_feed):
+                            processing_results['invalid_urls'].append(rss_feed)
+                        else:
+                            processing_results['error'].append(rss_feed)
 
                 if not valid_rows:
                     flash("No valid podcast data found in CSV.")
@@ -303,15 +375,7 @@ def init_routes(app):
                     try:
                         # Get existing podcasts for this chunk
                         rss_feeds = [row['rss_feed'] for row in chunk]
-                        existing_podcasts = supabase.table('podcasts')\
-                            .select('*')\
-                            .in_('rss_feed', rss_feeds)\
-                            .execute()
-
-                        existing_by_rss = {
-                            podcast['rss_feed']: podcast 
-                            for podcast in existing_podcasts.data
-                        }
+                        existing_by_rss = batch_check_existing_podcasts(supabase, rss_feeds)
 
                         # Process each podcast in chunk
                         for validated_data in chunk:
@@ -357,18 +421,21 @@ def init_routes(app):
                         logger.error(f"Error processing chunk: {str(e)}")
                         continue
 
-                # Log validation summary
-                log_validation_summary(processing_results)
-
                 # Create summary messages
-                messages = [f"Processed {sum(len(results) for results in processing_results.values())} podcasts"]
+                messages = []
                 
+                if processing_results['invalid_urls']:
+                    messages.append(f"Found {len(processing_results['invalid_urls'])} invalid RSS feed URLs")
+                    
                 if processing_results['new']:
                     messages.append(f"Added {len(processing_results['new'])} new podcasts")
+                    
                 if processing_results['updated']:
                     messages.append(f"Updated {len(processing_results['updated'])} existing podcasts")
+                    
                 if processing_results['skipped']:
                     messages.append(f"Skipped {len(processing_results['skipped'])} podcasts")
+                    
                 if processing_results['error']:
                     messages.append(f"Failed to process {len(processing_results['error'])} podcasts")
 
