@@ -9,6 +9,7 @@ import logging
 from utils import create_embedding
 import time
 import psutil
+from config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def monitor_memory(func):
             after_mem = process.memory_info().rss
             memory_used = (after_mem - before_mem) / 1024 / 1024  # Convert to MB
             
-            if memory_used > 500:  # Alert if using more than 500MB
+            if memory_used > Config.MEMORY_ALERT_THRESHOLD:
                 logger.warning(f"High memory usage detected in {func.__name__}: {memory_used:.2f}MB")
             
             return result
@@ -44,11 +45,17 @@ def new_york_time():
 
 def sanitize_filename(filename):
     """Remove invalid characters from filename"""
-    return re.sub(r'[\\/*?:"<>|]', "", filename)
+    if not filename:
+        return ""
+    # Remove invalid characters and limit length
+    sanitized = re.sub(r'[\\/*?:"<>|]', "", filename)
+    return sanitized[:255]  # Limit length to 255 characters
 
 def convert_date(date_str):
     """Convert date string to standard format"""
     try:
+        if not date_str:
+            return None
         date_str = date_str.replace('GMT', '+0000')
         date_obj = datetime.strptime(date_str, "%a, %d %b %Y %H:%M:%S %z")
         formatted_date = date_obj.strftime("%m/%d/%y")
@@ -57,191 +64,210 @@ def convert_date(date_str):
         logger.error(f"Error converting date: {str(e)}")
         return None
 
-def process_description(description_text, max_length=5000):
+def process_description(description_text, max_length=3000):
     """Process and truncate description text to prevent memory issues"""
     if not description_text:
         return ""
     
-    # Clean the text
     try:
-        clean_text = BeautifulSoup(description_text, 'lxml').get_text(strip=True)
+        # Use lxml parser for better memory efficiency
+        soup = BeautifulSoup(description_text, 'lxml')
+        clean_text = soup.get_text(strip=True)
+        soup.decompose()  # Clear the soup object
+        
         # Truncate if too long
         if len(clean_text) > max_length:
             clean_text = clean_text[:max_length] + "..."
+        
         return clean_text
     except Exception as e:
         logger.error(f"Error processing description: {str(e)}")
         return ""
 
-def get_rss_feed_content(url, max_retries=3, timeout=30):
-    """Get RSS feed content with retry logic and timeout"""
+def stream_rss_content(url, chunk_size=1000):
+    """Stream RSS feed content in chunks to manage memory"""
     ua = UserAgent()
     headers = {"User-Agent": ua.random}
     
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url=url, headers=headers, timeout=timeout)
+    try:
+        with requests.get(url, headers=headers, stream=True, timeout=Config.RSS_FETCH_TIMEOUT) as response:
             response.raise_for_status()
-            return response.text
-        except requests.RequestException as e:
-            if attempt == max_retries - 1:
-                logger.error(f"Failed to fetch RSS feed after {max_retries} attempts: {str(e)}")
-                raise
-            time.sleep(2 ** attempt)  # Exponential backoff
+            content = []
+            for chunk in response.iter_content(chunk_size=chunk_size, decode_unicode=True):
+                if chunk:
+                    content.append(chunk)
+            return ''.join(content)
+    except requests.RequestException as e:
+        logger.error(f"Error streaming RSS content: {str(e)}")
+        raise
+
+def process_episodes(items, max_episodes=5):
+    """Process podcast episodes with memory optimization"""
+    episodes = []
+    for item in items[:max_episodes]:
+        try:
+            episode = {
+                'title': item.find('title').text[:500] if item.find('title') else '',
+                'date': convert_date(item.find('pubDate').text) if item.find('pubDate') else '',
+                'description': process_description(
+                    item.find('description').text, 
+                    max_length=2000
+                ) if item.find('description') else ''
+            }
+            episodes.append(episode)
+        except Exception as e:
+            logger.error(f"Error processing episode: {str(e)}")
+        finally:
+            item.decompose()  # Clear processed item
+    
+    return episodes
 
 @monitor_memory
 def process_podcast(podcast, supabase):
-    """Process podcast data with memory optimization"""
+    """Process podcast data with enhanced memory optimization"""
     try:
-        title = ''
-        listennotes_url = f'ListenNotes URL: {podcast["listennotes_url"]}'
-        contact_name = ''
-        contact_email = ''
-        description = ''
-        last_5_episodes = []
-        categories_str = ''
-
-        # Fetch RSS feed content
-        rss_content = get_rss_feed_content(podcast['rss_feed'])
-        
-        # Parse RSS feed
-        soup = BeautifulSoup(rss_content, 'xml')
-        
-        # Get title
-        title_element = soup.find('title')
-        if title_element:
-            file_name = sanitize_filename(title_element.text)
-            title = file_name
-        
-        # Get contact info
-        try:
-            contact_name_elem = soup.find('itunes:name')
-            if contact_name_elem:
-                contact_name = contact_name_elem.text
-        except Exception as e:
-            logger.warning(f"Error getting contact name: {str(e)}")
-            
-        try:
-            contact_email_elem = soup.find('itunes:email')
-            if contact_email_elem:
-                contact_email = contact_email_elem.text
-        except Exception as e:
-            logger.warning(f"Error getting contact email: {str(e)}")
-            
-        # Get description
-        try:
-            description_elem = soup.find('description')
-            if description_elem:
-                description = process_description(description_elem.text)
-        except Exception as e:
-            logger.warning(f"Error getting description: {str(e)}")
-
-        # Process episodes
-        items = soup.select('item')
-        for item in items[:5]:  # Only process last 5 episodes
-            episode_data = {}
-            try:
-                pub_date = item.find('pubDate')
-                if pub_date:
-                    episode_data['Date'] = convert_date(pub_date.text)
-                else:
-                    episode_data['Date'] = ''
-            except Exception as e:
-                logger.warning(f"Error processing episode date: {str(e)}")
-                episode_data['Date'] = ''
-                
-            try:
-                episode_title = item.find('title')
-                if episode_title:
-                    episode_data['Title'] = episode_title.text
-                else:
-                    episode_data['Title'] = ''
-            except Exception as e:
-                logger.warning(f"Error processing episode title: {str(e)}")
-                episode_data['Title'] = ''
-                
-            try:
-                episode_desc = item.find('description')
-                if episode_desc:
-                    episode_data['Description'] = process_description(episode_desc.text)
-                else:
-                    episode_data['Description'] = ''
-            except Exception as e:
-                logger.warning(f"Error processing episode description: {str(e)}")
-                episode_data['Description'] = ''
-            
-            last_5_episodes.append(episode_data)
-
-        # Get categories
-        categories = soup.find_all('itunes:category')
-        category_texts = [category.get('text', '') for category in categories if category.has_attr('text')]
-        categories_str = ', '.join(category_texts[:3])  # Limit to top 3 categories
-
-        # Create embedding for podcast description
-        podcast_embedding = None
-        if description:
-            podcast_embedding = create_embedding(description)
-
-        # Clear BeautifulSoup object to free memory
-        soup.decompose()
-        gc.collect()
-
-        # Update podcast in Supabase
-        podcast_update = {
-            "status": 'Done',
-            "filename": file_name[:500] if file_name else '',
-            "last_updated": new_york_time(),
-            "title": title[:500],
-            "description": description,
-            "contact_name": contact_name[:255],
-            "contact_email": contact_email[:255],
-            "categories": categories_str[:500],
-            "embedding": podcast_embedding
+        result = {
+            'title': '',
+            'contact_name': '',
+            'contact_email': '',
+            'description': '',
+            'categories': []
         }
 
-        supabase.table('podcasts').update(podcast_update).eq('id', podcast['id']).execute()
+        # Stream and process RSS content
+        try:
+            for attempt in range(Config.RSS_MAX_RETRIES):
+                try:
+                    rss_content = stream_rss_content(podcast['rss_feed'])
+                    break
+                except requests.RequestException as e:
+                    if attempt == Config.RSS_MAX_RETRIES - 1:
+                        raise
+                    time.sleep(2 ** attempt)  # Exponential backoff
 
-        # Add episodes with batch processing
-        for episode_data in last_5_episodes:
-            # Create embedding for episode description
-            episode_embedding = None
-            if episode_data['Description']:
-                episode_embedding = create_embedding(episode_data['Description'])
-            
-            episode_record = {
-                "podcast_id": podcast['id'],
-                "client_id": podcast['client_id'],
-                "title": episode_data['Title'][:500],
-                "date": episode_data['Date'],
-                "description": episode_data['Description'],
-                "embedding": episode_embedding
+            # Use lxml parser for better memory efficiency
+            soup = BeautifulSoup(rss_content, 'lxml-xml')
+            rss_content = None  # Clear raw content
+            gc.collect()
+
+            # Extract basic metadata
+            if title_elem := soup.find('title'):
+                result['title'] = sanitize_filename(title_elem.text)
+
+            if name_elem := soup.find('itunes:name'):
+                result['contact_name'] = name_elem.text[:255]
+
+            if email_elem := soup.find('itunes:email'):
+                result['contact_email'] = email_elem.text[:255]
+
+            if desc_elem := soup.find('description'):
+                result['description'] = process_description(desc_elem.text)
+
+            # Process categories
+            categories = soup.find_all('itunes:category')
+            result['categories'] = [cat.get('text', '') for cat in categories[:3] if cat.has_attr('text')]
+
+            # Process episodes
+            all_items = soup.find_all('item')
+            episodes = process_episodes(all_items, max_episodes=Config.MAX_EPISODES)
+
+            # Clear soup to free memory
+            soup.decompose()
+            gc.collect()
+
+            # Create podcast embedding
+            podcast_embedding = None
+            if result['description']:
+                podcast_embedding = create_embedding(result['description'])
+                time.sleep(0.5)  # Rate limiting for API calls
+
+            # Update podcast record
+            podcast_update = {
+                "status": 'Done',
+                "filename": result['title'][:500],
+                "last_updated": new_york_time(),
+                "title": result['title'][:500],
+                "description": result['description'],
+                "contact_name": result['contact_name'],
+                "contact_email": result['contact_email'],
+                "categories": ', '.join(result['categories'])[:500],
+                "embedding": podcast_embedding
             }
-            
-            supabase.table('episodes').insert(episode_record).execute()
-            
-            # Clear episode embedding from memory
-            episode_embedding = None
-        
-        # Clear all large variables
-        description = None
-        last_5_episodes = None
-        podcast_embedding = None
-        gc.collect()
 
-        logger.info(f'Successfully processed podcast: {title}')
+            # Update podcast first
+            supabase.table('podcasts').update(podcast_update).eq('id', podcast['id']).execute()
+
+            # Process episodes in smaller batches
+            batch_size = 2
+            for i in range(0, len(episodes), batch_size):
+                batch = episodes[i:i + batch_size]
+                for episode in batch:
+                    try:
+                        # Create embedding for episode
+                        episode_embedding = None
+                        if episode['description']:
+                            episode_embedding = create_embedding(episode['description'])
+                            time.sleep(0.5)  # Rate limiting for API calls
+
+                        episode_record = {
+                            "podcast_id": podcast['id'],
+                            "client_id": podcast['client_id'],
+                            "title": episode['title'],
+                            "date": episode['date'],
+                            "description": episode['description'],
+                            "embedding": episode_embedding
+                        }
+
+                        supabase.table('episodes').insert(episode_record).execute()
+                    except Exception as e:
+                        logger.error(f"Error processing episode batch: {str(e)}")
+                    finally:
+                        episode_embedding = None
+                        gc.collect()
+
+                # Small delay between batches
+                time.sleep(0.5)
+
+            logger.info(f'Successfully processed podcast: {result["title"]}')
+
+        except requests.RequestException as e:
+            logger.error(f"Error fetching RSS feed: {str(e)}")
+            raise
 
     except Exception as e:
         logger.error(f'Error processing podcast {podcast["rss_feed"]}: {str(e)}')
         raise
 
+    finally:
+        # Final cleanup
+        result = None
+        episodes = None
+        podcast_embedding = None
+        gc.collect()
+
 def main():
     """Main function for testing"""
     try:
         logger.info("Starting podcast processing...")
+        
+        # Monitor initial memory usage
+        process = psutil.Process()
+        initial_memory = process.memory_info().rss / 1024 / 1024
+        logger.info(f"Initial memory usage: {initial_memory:.2f}MB")
+        
         # Add any test code here
+        
+        # Monitor final memory usage
+        final_memory = process.memory_info().rss / 1024 / 1024
+        logger.info(f"Final memory usage: {final_memory:.2f}MB")
+        logger.info(f"Memory difference: {final_memory - initial_memory:.2f}MB")
+        
         logger.info("Podcast processing completed")
+        
     except Exception as e:
         logger.error(f"Error in main: {str(e)}")
+    finally:
+        gc.collect()
 
 if __name__ == "__main__":
     main()
