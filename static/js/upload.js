@@ -2,21 +2,21 @@ function toggleClientInput() {
     const select = document.getElementById('clientSelect');
     const newClientInput = document.getElementById('newClientInput');
     newClientInput.style.display = select.value === 'new' ? 'block' : 'none';
-}
-
-function handleDrag(e) {
+ }
+ 
+ function handleDrag(e) {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.add('dragover');
-}
-
-function handleDragLeave(e) {
+ }
+ 
+ function handleDragLeave(e) {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.remove('dragover');
-}
-
-function handleFileDrop(e) {
+ }
+ 
+ function handleFileDrop(e) {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.remove('dragover');
@@ -32,9 +32,9 @@ function handleFileDrop(e) {
     files.forEach(file => dt.items.add(file));
     input.files = dt.files;
     handleFileSelect({ target: input });
-}
-
-function handlePodcastDrop(e) {
+ }
+ 
+ function handlePodcastDrop(e) {
     e.preventDefault();
     e.stopPropagation();
     e.currentTarget.classList.remove('dragover');
@@ -46,21 +46,20 @@ function handlePodcastDrop(e) {
     } else {
         alert('Please upload a CSV file');
     }
-}
-
-function handleFileSelect(e) {
+ }
+ 
+ function handleFileSelect(e) {
     const files = e.target.files;
     const selectedFilesDiv = document.getElementById('selectedClientFiles');
     selectedFilesDiv.innerHTML = '';
     
     Array.from(files).forEach(file => {
-        // Check allowed file types
         if (!file.name.match(/\.(txt|docx|html)$/i)) {
             alert('Please upload only .txt, .docx, or .html files');
             e.target.value = '';
             return;
         }
-
+ 
         const fileDiv = document.createElement('div');
         fileDiv.className = 'flex items-center space-x-2 text-sm text-gray-600 bg-gray-100 p-2 rounded';
         fileDiv.innerHTML = `
@@ -72,16 +71,16 @@ function handleFileSelect(e) {
         `;
         selectedFilesDiv.appendChild(fileDiv);
     });
-}
-
-function removeFile(button) {
+ }
+ 
+ function removeFile(button) {
     const fileDiv = button.parentElement;
     fileDiv.remove();
     const fileInput = document.getElementById('clientFiles');
     fileInput.value = '';
-}
-
-function handlePodcastSelect(e) {
+ }
+ 
+ function handlePodcastSelect(e) {
     const file = e.target.files[0];
     const selectedFileDiv = document.getElementById('selectedPodcastFile');
     
@@ -100,23 +99,23 @@ function handlePodcastSelect(e) {
         alert('Please upload a CSV file');
         e.target.value = '';
     }
-}
-
-function removePodcastFile() {
+ }
+ 
+ function removePodcastFile() {
     const selectedFileDiv = document.getElementById('selectedPodcastFile');
     selectedFileDiv.innerHTML = '';
     const fileInput = document.getElementById('podcastFile');
     fileInput.value = '';
-}
-
-function updateProgress(progressDiv, percentage) {
+ }
+ 
+ function updateProgress(progressDiv, percentage) {
     const progressBar = progressDiv.querySelector('.progress-bar');
     const progressText = progressDiv.querySelector('span');
     progressBar.style.width = percentage + '%';
     progressText.textContent = percentage + '%';
-}
-
-async function showSuccessMessage(message) {
+ }
+ 
+ async function showSuccessMessage(message) {
     const successMessage = document.getElementById('successMessage');
     successMessage.textContent = message;
     successMessage.classList.add('show');
@@ -124,15 +123,15 @@ async function showSuccessMessage(message) {
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     successMessage.classList.remove('show');
-}
-
-function updateClientDropdowns(clients) {
+ }
+ 
+ function updateClientDropdowns(clients) {
     const clientSelects = [
         document.getElementById('clientSelect'),
         document.getElementById('podcastClientSelect'),
         document.getElementById('matchingClientSelect')
     ];
-
+ 
     clientSelects.forEach(select => {
         const currentValue = select.value;
         select.innerHTML = '<option value="">Select a client</option>';
@@ -155,19 +154,19 @@ function updateClientDropdowns(clients) {
             select.value = currentValue;
         }
     });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
+ }
+ 
+ document.addEventListener('DOMContentLoaded', function() {
     const clientForm = document.getElementById('clientForm');
     const podcastForm = document.getElementById('podcastForm');
-
+ 
     if (clientForm) {
         clientForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
             const progressDiv = document.getElementById('clientUploadProgress');
-
+ 
             try {
                 progressDiv.classList.remove('hidden');
                 let progress = 0;
@@ -177,15 +176,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         updateProgress(progressDiv, progress);
                     }
                 }, 300);
-
+ 
                 const response = await fetch(form.action, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    timeout: 300000  // 5 minutes timeout
                 });
-
+ 
                 clearInterval(interval);
                 updateProgress(progressDiv, 100);
-
+ 
                 if (response.ok) {
                     const clientResponse = await fetch('/get_clients');
                     const clients = await clientResponse.json();
@@ -208,14 +208,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
+ 
     if (podcastForm) {
         podcastForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
             const formData = new FormData(form);
             const progressDiv = document.getElementById('podcastUploadProgress');
-
+ 
             try {
                 progressDiv.classList.remove('hidden');
                 let progress = 0;
@@ -225,15 +225,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         updateProgress(progressDiv, progress);
                     }
                 }, 300);
-
+ 
                 const response = await fetch(form.action, {
                     method: 'POST',
-                    body: formData
+                    body: formData,
+                    timeout: 3000000  // 50 minutes timeout
                 });
-
+ 
                 clearInterval(interval);
                 updateProgress(progressDiv, 100);
-
+ 
                 if (response.ok) {
                     setTimeout(() => {
                         progressDiv.classList.add('hidden');
@@ -252,4 +253,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
+ });

@@ -44,7 +44,7 @@ def create_app():
            ALLOWED_EXTENSIONS={'txt', 'docx', 'html', 'csv'},
            SESSION_COOKIE_SAMESITE='Lax',
            SESSION_COOKIE_SECURE=True,
-           PERMANENT_SESSION_LIFETIME=1800,
+           PERMANENT_SESSION_LIFETIME=3600,
            SESSION_COOKIE_HTTPONLY=True
        )
 
@@ -175,3 +175,4 @@ if __name__ == '__main__':
    except Exception as e:
        logger.critical(f"Application failed to start: {str(e)}")
        raise
+   
