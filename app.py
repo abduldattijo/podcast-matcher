@@ -18,6 +18,7 @@ from database import supabase
 from flask_cors import CORS
 from datetime import datetime
 from flask import request
+from flask import session
 # app.py
 
 
@@ -53,6 +54,8 @@ def create_app():
         
         # Enable CORS
         CORS(app)
+        
+       
 
         # Basic configuration
         app.config.update(
@@ -65,6 +68,11 @@ def create_app():
             SESSION_COOKIE_HTTPONLY=True,
             ALLOWED_EXTENSIONS={'txt', 'docx', 'html', 'csv'}
         )
+        
+        @app.after_request
+        def clean_session(response):
+            session.modified = True
+            return response
         
        
 
