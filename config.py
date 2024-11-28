@@ -7,7 +7,7 @@ load_dotenv()
 class Config:
     # Basic Flask configuration
     SECRET_KEY = os.getenv('SECRET_KEY', 'your-secret-key-here')
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+    MAX_CONTENT_LENGTH = 300 * 1024 * 1024  # 300MB max file size
     UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads')
     ALLOWED_EXTENSIONS = {'txt', 'docx', 'html', 'csv'}
 
@@ -21,14 +21,14 @@ class Config:
     # Processing configurations
     CHUNK_SIZE = 10  # Number of podcasts to process at once
     MAX_DESCRIPTION_LENGTH = 5000  # Maximum length for descriptions
-    RSS_FETCH_TIMEOUT = 30  # Seconds to wait for RSS feed
+    RSS_FETCH_TIMEOUT = 300  # Seconds to wait for RSS feed
     RSS_MAX_RETRIES = 3  # Number of times to retry fetching RSS feed
     
     # Memory monitoring
     MEMORY_ALERT_THRESHOLD = 500  # MB
 
     # Request timeouts
-    REQUEST_TIMEOUT = 300  # 5 minutes
+    REQUEST_TIMEOUT = 1000  # 5 minutes
 
     # Episode processing
     MAX_EPISODES = 5  # Maximum number of episodes to process per podcast
