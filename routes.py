@@ -219,34 +219,44 @@ def init_routes(app):
                 csv_reader = csv.DictReader(StringIO(csv_data))
                 rows = list(csv_reader)
                 
-                # Process in chunks of 10 podcasts at a time
-                CHUNK_SIZE = 10
+                # Get all RSS feeds at once
+                all_rss_feeds = [row['RSS Feed'] for row in rows]
+                
+                # Batch query existing podcasts
+                existing_podcasts = supabase.table('podcasts')\
+                    .select('*')\
+                    .in_('rss_feed', all_rss_feeds)\
+                    .execute()
+
+                # Create lookup dictionaries for faster access
+                existing_by_rss = {
+                    podcast['rss_feed']: podcast 
+                    for podcast in existing_podcasts.data
+                }
+                
+                # Process in smaller chunks
+                CHUNK_SIZE = 5
                 new_podcasts = []
                 updated_podcasts = []
                 skipped_podcasts = []
                 
-                for chunk in chunked_iterable(rows, CHUNK_SIZE):
+                for i in range(0, len(rows), CHUNK_SIZE):
+                    chunk = rows[i:i + CHUNK_SIZE]
+                    
                     for row in chunk:
                         try:
-                            existing_podcast = supabase.table('podcasts')\
-                                .select('*')\
-                                .eq('rss_feed', row['RSS Feed'])\
-                                .eq('client_id', client_id)\
-                                .execute()
+                            rss_feed = row['RSS Feed']
+                            existing = existing_by_rss.get(rss_feed)
 
-                            other_client_podcast = supabase.table('podcasts')\
-                                .select('*')\
-                                .eq('rss_feed', row['RSS Feed'])\
-                                .neq('client_id', client_id)\
-                                .execute()
-
-                            if existing_podcast.data:
-                                podcast = existing_podcast.data[0]
-                                if podcast['status'] != 'Done':
-                                    process_podcast(podcast, supabase)
-                                    updated_podcasts.append(podcast['title'] or row['RSS Feed'])
+                            if existing:
+                                if existing['client_id'] == client_id:
+                                    if existing['status'] != 'Done':
+                                        process_podcast(existing, supabase)
+                                        updated_podcasts.append(existing['title'] or rss_feed)
+                                    else:
+                                        skipped_podcasts.append(existing['title'] or rss_feed)
                                 else:
-                                    skipped_podcasts.append(podcast['title'] or row['RSS Feed'])
+                                    flash(f"Note: Podcast '{rss_feed}' exists for another client")
                             else:
                                 new_podcast = {
                                     "client_id": client_id,
@@ -254,7 +264,7 @@ def init_routes(app):
                                     "listennotes_url": row['ListenNotes URL'][:255],
                                     "listen_score": int(row['ListenScore']),
                                     "global_rank": float(row['Global Rank'].strip('%')) / 100,
-                                    "rss_feed": row['RSS Feed'][:255],
+                                    "rss_feed": rss_feed[:255],
                                     "status": "New"
                                 }
                                 
@@ -262,28 +272,22 @@ def init_routes(app):
                                 new_podcast_data = response.data[0]
                                 
                                 process_podcast(new_podcast_data, supabase)
-                                new_podcasts.append(new_podcast_data['title'] or row['RSS Feed'])
-
-                                if other_client_podcast.data:
-                                    flash(f"Note: Podcast '{row['RSS Feed']}' also exists for another client")
+                                new_podcasts.append(new_podcast_data['title'] or rss_feed)
 
                         except Exception as e:
                             logger.error(f"Error processing podcast row: {str(e)}")
                             flash(f"Error processing podcast: {row['RSS Feed']}")
-                        
-                        # Clear variables from memory
-                        existing_podcast = None
-                        other_client_podcast = None
-                        
-                    # Sleep briefly between chunks to allow memory cleanup
-                    time.sleep(0.1)
+
+                    # Clear memory between chunks
+                    gc.collect()
+                    time.sleep(0.5)  # Brief pause between chunks
 
                 if new_podcasts:
-                    flash(f"Added {len(new_podcasts)} new podcasts: {', '.join(new_podcasts)}")
+                    flash(f"Added {len(new_podcasts)} new podcasts: {', '.join(new_podcasts[:5])}...")
                 if updated_podcasts:
-                    flash(f"Updated {len(updated_podcasts)} existing podcasts: {', '.join(updated_podcasts)}")
+                    flash(f"Updated {len(updated_podcasts)} existing podcasts: {', '.join(updated_podcasts[:5])}...")
                 if skipped_podcasts:
-                    flash(f"Skipped {len(skipped_podcasts)} already processed podcasts: {', '.join(skipped_podcasts)}")
+                    flash(f"Skipped {len(skipped_podcasts)} already processed podcasts: {', '.join(skipped_podcasts[:5])}...")
 
             return redirect(url_for('upload_combined'))
 
