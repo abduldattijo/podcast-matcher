@@ -4,26 +4,16 @@ from datetime import datetime
 import logging
 from typing import Optional, List, Dict, Union
 import re
+import time
 
 logger = logging.getLogger(__name__)
 
 def create_embedding(text: str) -> Optional[List[float]]:
-    """
-    Create embedding for text using OpenAI's API with proper chunking for long texts.
-    
-    Args:
-        text (str): The text to create an embedding for
-        
-    Returns:
-        Optional[List[float]]: The embedding vector or None if there's an error
-    """
     try:
-        max_tokens = 8000
-        chunk_size = max_tokens
-
-        # Split text into chunks if it's too long
-        chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
-
+        max_length = 2000
+        chunks = [text[i:i + max_length] for i in range(0, len(text), max_length)]
+        time.sleep(2)  # Rate limiting
+        
         embeddings = []
         for chunk in chunks:
             response = openai.Embedding.create(
@@ -32,10 +22,8 @@ def create_embedding(text: str) -> Optional[List[float]]:
             )
             embedding = response['data'][0]['embedding']
             embeddings.append(embedding)
-
-        # Combine chunk embeddings by taking their mean
+            
         combined_embedding = np.mean(embeddings, axis=0)
-
         return combined_embedding.tolist()
     except Exception as e:
         logger.error(f"Error creating embedding: {str(e)}")

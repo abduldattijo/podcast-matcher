@@ -1,5 +1,7 @@
 from gevent import monkey
 monkey.patch_all()
+import resource
+resource.setrlimit(resource.RLIMIT_AS, (512 * 1024 * 1024, -1))  # 512MB limit
 from flask import Flask, render_template
 import os
 import logging
@@ -10,6 +12,8 @@ from database import supabase
 from flask_cors import CORS
 from datetime import datetime
 from flask import request
+# app.py
+
 
 # Ensure logs directory exists
 os.makedirs('logs', exist_ok=True)
