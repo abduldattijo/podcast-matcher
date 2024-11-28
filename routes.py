@@ -182,54 +182,78 @@ def compress_messages(podcasts, status):
     }
     return status_messages.get(status)
 
-def validate_podcast_row(row):
+def clean_numeric_value(value, default=0):
+    """Clean and convert numeric values with enhanced error handling"""
+    if value is None:
+        return default
+    
+    try:
+        # Convert to string first
+        str_value = str(value).strip()
+        # Remove any % signs
+        str_value = str_value.replace('%', '')
+        
+        if not str_value or str_value.lower() == 'nan':
+            return default
+            
+        # Try to convert to float first
+        float_value = float(str_value)
+        return float_value
+    except (ValueError, TypeError):
+        return default
+
+def validate_podcast_row(row, row_number):
     """Validate and clean podcast row data with enhanced error handling"""
     try:
         # Validate RSS Feed (required field)
-        rss_feed = validate_url(row.get('RSS Feed', ''))
+        rss_feed = row.get('RSS Feed', '').strip()
         if not rss_feed:
-            logger.warning("Invalid or missing RSS feed URL")
-            return None
+            logger.warning(f"Row {row_number}: Empty RSS feed URL")
+            return None, "Empty RSS feed URL"
 
-        # Validate ListenNotes URL
-        listennotes_url = validate_url(row.get('ListenNotes URL', ''))
-        if not listennotes_url:
-            listennotes_url = ''  # Optional field, can be empty
+        validated_url = validate_url(rss_feed)
+        if not validated_url:
+            logger.warning(f"Row {row_number}: Invalid RSS feed URL: {rss_feed}")
+            return None, f"Invalid RSS feed URL: {rss_feed}"
 
         # Clean listen score
-        listen_score = 0
         raw_score = row.get('ListenScore', '0')
-        if raw_score:
-            try:
-                listen_score = int(clean_numeric_value(raw_score, 0))
-                listen_score = max(0, min(listen_score, 100))
-            except ValueError:
-                logger.warning(f"Invalid listen score format: {raw_score}, defaulting to 0")
-                listen_score = 0
+        try:
+            listen_score = clean_numeric_value(raw_score, default=0)
+            listen_score = int(max(0, min(listen_score, 100)))
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Row {row_number}: Invalid ListenScore '{raw_score}', defaulting to 0")
+            listen_score = 0
 
         # Clean global rank
-        global_rank = 0.0
         raw_rank = row.get('Global Rank', '0%')
-        if raw_rank:
-            try:
-                rank_value = clean_numeric_value(raw_rank.strip('%'), 0)
-                global_rank = rank_value / 100.0
-                global_rank = max(0.0, min(global_rank, 1.0))
-            except ValueError:
-                logger.warning(f"Invalid global rank format: {raw_rank}, defaulting to 0")
-                global_rank = 0.0
+        try:
+            # Remove % and convert to float
+            rank_value = clean_numeric_value(raw_rank, default=0)
+            # Convert to decimal (e.g., 50% -> 0.5)
+            global_rank = min(1.0, max(0.0, rank_value / 100.0))
+        except (ValueError, TypeError) as e:
+            logger.warning(f"Row {row_number}: Invalid Global Rank '{raw_rank}', defaulting to 0")
+            global_rank = 0.0
 
         return {
             "search_term": (row.get('Search Term') or '').strip()[:100],
-            "listennotes_url": listennotes_url[:255],
+            "listennotes_url": validate_url(row.get('ListenNotes URL', '')) or '',
             "listen_score": listen_score,
             "global_rank": global_rank,
-            "rss_feed": rss_feed[:255]
-        }
+            "rss_feed": validated_url
+        }, None
 
     except Exception as e:
-        logger.error(f"Error validating row data: {str(e)}")
-        return None
+        error_msg = f"Row {row_number}: {str(e)}"
+        logger.error(error_msg)
+        return None, error_msg
+
+def debug_row_data(row, row_number):
+    """Debug function to log row data"""
+    logger.debug(f"Row {row_number} data:")
+    for key, value in row.items():
+        logger.debug(f"  {key}: {value} (type: {type(value)})")
 
 def monitor_memory(func):
     """Decorator to monitor memory usage during function execution"""
