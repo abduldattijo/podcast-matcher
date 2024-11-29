@@ -154,6 +154,31 @@ function toggleClientInput() {
     });
  }
  
+ async function waitForUploadCompletion(clientId) {
+    let retries = 0;
+    const maxRetries = 60; // 5 minutes total (5s interval)
+    
+    while (retries < maxRetries) {
+        try {
+            const response = await fetch(`/upload_status?client_id=${clientId}`);
+            const data = await response.json();
+            
+            if (data.status === 'complete') {
+                return true;
+            } else if (data.status === 'error') {
+                return false;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+            retries++;
+        } catch (error) {
+            console.error('Error checking upload status:', error);
+            return false;
+        }
+    }
+    return false;
+ }
+ 
  document.addEventListener('DOMContentLoaded', function() {
     const clientForm = document.getElementById('clientForm');
     const podcastForm = document.getElementById('podcastForm');
@@ -167,40 +192,27 @@ function toggleClientInput() {
  
             try {
                 progressDiv.classList.remove('hidden');
+                updateProgress(progressDiv, 10);
+                
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData
                 });
  
                 if (response.ok) {
-                    let progress = 0;
-                    const checkStatus = setInterval(async () => {
-                        progress += 1;
-                        if (progress <= 95) {
-                            updateProgress(progressDiv, progress);
-                        }
-                        
-                        try {
-                            const statusResponse = await fetch('/upload_status');
-                            const data = await statusResponse.json();
-                            
-                            if (data.status === 'complete') {
-                                clearInterval(checkStatus);
-                                updateProgress(progressDiv, 100);
-                                
-                                const clientResponse = await fetch('/get_clients');
-                                const clients = await clientResponse.json();
-                                updateClientDropdowns(clients);
-                                
-                                progressDiv.classList.add('hidden');
-                                showSuccessMessage("Client files uploaded successfully!");
-                                document.getElementById('selectedClientFiles').innerHTML = '';
-                                form.reset();
-                            }
-                        } catch (error) {
-                            console.error('Error checking upload status:', error);
-                        }
-                    }, 2000);
+                    const clientResponse = await fetch('/get_clients');
+                    const clients = await clientResponse.json();
+                    updateClientDropdowns(clients);
+                    
+                    updateProgress(progressDiv, 100);
+                    setTimeout(() => {
+                        progressDiv.classList.add('hidden');
+                        showSuccessMessage("Client files uploaded successfully!");
+                        document.getElementById('selectedClientFiles').innerHTML = '';
+                        form.reset();
+                    }, 1000);
+                } else {
+                    throw new Error('Upload failed');
                 }
             } catch (error) {
                 console.error('Upload error:', error);
@@ -216,38 +228,44 @@ function toggleClientInput() {
             const form = e.target;
             const formData = new FormData(form);
             const progressDiv = document.getElementById('podcastUploadProgress');
+            const clientId = formData.get('client_id');
  
             try {
                 progressDiv.classList.remove('hidden');
+                updateProgress(progressDiv, 10);
+ 
                 const response = await fetch(form.action, {
                     method: 'POST',
                     body: formData
                 });
  
                 if (response.ok) {
-                    let progress = 0;
-                    const checkStatus = setInterval(async () => {
+                    // Start progress animation
+                    let progress = 10;
+                    const progressInterval = setInterval(() => {
                         progress += 1;
-                        if (progress <= 95) {
+                        if (progress <= 90) {
                             updateProgress(progressDiv, progress);
                         }
-                        
-                        try {
-                            const statusResponse = await fetch('/upload_status');
-                            const data = await statusResponse.json();
-                            
-                            if (data.status === 'complete') {
-                                clearInterval(checkStatus);
-                                updateProgress(progressDiv, 100);
-                                progressDiv.classList.add('hidden');
-                                showSuccessMessage("Podcast data uploaded successfully!");
-                                document.getElementById('selectedPodcastFile').innerHTML = '';
-                                form.reset();
-                            }
-                        } catch (error) {
-                            console.error('Error checking upload status:', error);
-                        }
-                    }, 2000);
+                    }, 3000);
+ 
+                    // Wait for upload completion
+                    const uploadCompleted = await waitForUploadCompletion(clientId);
+                    clearInterval(progressInterval);
+ 
+                    if (uploadCompleted) {
+                        updateProgress(progressDiv, 100);
+                        setTimeout(() => {
+                            progressDiv.classList.add('hidden');
+                            showSuccessMessage("Podcast data uploaded successfully!");
+                            document.getElementById('selectedPodcastFile').innerHTML = '';
+                            form.reset();
+                        }, 1000);
+                    } else {
+                        throw new Error('Upload timed out');
+                    }
+                } else {
+                    throw new Error('Upload failed');
                 }
             } catch (error) {
                 console.error('Upload error:', error);
