@@ -7,13 +7,14 @@ from docx import Document
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
-from utils import create_embedding
+from utils import create_embedding, generate_score_reason, generate_mismatch_explanation, calculate_recency_score
 from database import supabase
 from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
 def parse_embedding_string(embedding_str):
+    """Parse embedding string into a list of floats."""
     try:
         if isinstance(embedding_str, list):
             return embedding_str
@@ -25,32 +26,8 @@ def parse_embedding_string(embedding_str):
         logger.error(f"Error parsing embedding: {str(e)}")
         return None
 
-def parse_listen_score_ranges(ls_ranges_str):
-    try:
-        if not ls_ranges_str:
-            return []
-        
-        ranges = []
-        for range_str in ls_ranges_str.split(','):
-            if range_str == "80-100":
-                ranges.append((80, 100))
-            else:
-                start, end = map(int, range_str.split('-'))
-                ranges.append((start, end))
-        return ranges
-    except Exception as e:
-        logger.error(f"Error parsing listen score ranges: {str(e)}")
-        return []
-
-def is_in_listen_score_range(score, ranges):
-    if not ranges:
-        return True
-    for start, end in ranges:
-        if start <= score <= end:
-            return True
-    return False
-
 def extract_text_from_html(html_content):
+    """Extract clean text from HTML content."""
     try:
         soup = BeautifulSoup(html_content, 'html.parser')
         # Remove script and style elements
@@ -154,6 +131,12 @@ def init_routes(app):
                             "embedding": str(embedding_list)
                         }).execute()
 
+                    # Clean up uploaded file
+                    try:
+                        os.remove(filepath)
+                    except Exception as e:
+                        logger.error(f"Error removing temporary file {filepath}: {str(e)}")
+
             flash("Client data uploaded successfully.")
             return redirect(url_for('upload_combined'))
 
@@ -165,7 +148,7 @@ def init_routes(app):
     @app.route('/upload_podcast', methods=['POST'])
     def upload_podcast():
         try:
-            from main import process_podcast
+            from scripts.main import process_podcast
 
             client_id = request.form.get("client_id")
             if not client_id:
@@ -191,14 +174,12 @@ def init_routes(app):
 
                 for row in csv_reader:
                     try:
-                        # Check if podcast exists for this specific client
                         existing_podcast = supabase.table('podcasts')\
                             .select('*')\
                             .eq('rss_feed', row['RSS Feed'])\
                             .eq('client_id', client_id)\
                             .execute()
 
-                        # Check if podcast exists for other clients
                         other_client_podcast = supabase.table('podcasts')\
                             .select('*')\
                             .eq('rss_feed', row['RSS Feed'])\
@@ -254,14 +235,12 @@ def init_routes(app):
     def match_podcasts():
         try:
             client_id = request.args.get("client_id")
-            ls_ranges_str = request.args.get("ls_ranges", "")
+            min_score = float(request.args.get("min_score", 20))
+            max_score = float(request.args.get("max_score", 100))
+            include_blank = request.args.get("include_blank", "false").lower() == "true"
 
             if not client_id:
                 return jsonify({"error": "Client ID is missing."}), 400
-
-            # Parse listen score ranges
-            ls_ranges = parse_listen_score_ranges(ls_ranges_str)
-            logger.info(f"Applying listen score ranges: {ls_ranges}")
 
             # Get client data from Supabase
             client_data = supabase.table('client_data')\
@@ -286,7 +265,7 @@ def init_routes(app):
             
             client_embeddings = np.array([data['embedding'] for data in valid_client_files])
 
-            # Get podcasts from Supabase
+            # Get podcasts from Supabase with listen score filtering
             podcasts = supabase.table('podcasts')\
                 .select('*')\
                 .eq('client_id', client_id)\
@@ -297,16 +276,26 @@ def init_routes(app):
 
             # Apply listen score filter and parse embeddings
             valid_podcasts = []
-            for p in podcasts.data:
+            for podcast in podcasts.data:
                 try:
-                    listen_score = float(p['listen_score'])
-                    if p.get('embedding') and (not ls_ranges or is_in_listen_score_range(listen_score, ls_ranges)):
-                        embedding = parse_embedding_string(p['embedding'])
+                    if podcast.get('embedding'):
+                        embedding = parse_embedding_string(podcast['embedding'])
                         if embedding:
-                            p['embedding'] = embedding
-                            valid_podcasts.append(p)
+                            listen_score = podcast.get('listen_score')
+                            
+                            # Handle listen score filtering
+                            if listen_score is None:
+                                if include_blank:
+                                    podcast['embedding'] = embedding
+                                    valid_podcasts.append(podcast)
+                            else:
+                                score = float(listen_score)
+                                if min_score <= score <= max_score:
+                                    podcast['embedding'] = embedding
+                                    valid_podcasts.append(podcast)
+                                    
                 except (ValueError, TypeError) as e:
-                    logger.warning(f"Invalid listen score for podcast {p.get('id')}: {e}")
+                    logger.warning(f"Invalid listen score for podcast {podcast.get('id')}: {e}")
                     continue
 
             if not valid_podcasts:
@@ -314,7 +303,7 @@ def init_routes(app):
 
             podcast_embeddings = np.array([p['embedding'] for p in valid_podcasts])
 
-            # Get episodes
+            # Get episodes for all valid podcasts
             episode_ids = [p['id'] for p in valid_podcasts]
             episodes = supabase.table('episodes')\
                 .select('*')\
@@ -322,12 +311,12 @@ def init_routes(app):
                 .execute()
 
             valid_episodes = []
-            for e in episodes.data:
-                if e.get('embedding'):
-                    embedding = parse_embedding_string(e['embedding'])
+            for episode in episodes.data:
+                if episode.get('embedding'):
+                    embedding = parse_embedding_string(episode['embedding'])
                     if embedding:
-                        e['embedding'] = embedding
-                        valid_episodes.append(e)
+                        episode['embedding'] = embedding
+                        valid_episodes.append(episode)
 
             final_scores = []
             for podcast in valid_podcasts:
@@ -347,28 +336,13 @@ def init_routes(app):
                     guest_fit_score = 0.0
 
                 # Get audience score from listen_score
-                audience_score = float(podcast['listen_score'])
+                audience_score = float(podcast['listen_score']) if podcast.get('listen_score') is not None else 0.0
 
                 # Calculate host interest score
                 host_interest_score = 100.0 * (1 - podcast['global_rank'])
 
                 # Calculate recency score
-                if podcast.get('last_updated'):
-                    from datetime import datetime
-                    last_update = datetime.strptime(podcast['last_updated'], '%m-%d-%Y')
-                    days_difference = (datetime.now() - last_update).days
-                    if days_difference <= 7:
-                        recency_score = 100.0
-                    elif days_difference <= 14:
-                        recency_score = 85.0
-                    elif days_difference <= 30:
-                        recency_score = 70.0
-                    elif days_difference <= 60:
-                        recency_score = 55.0
-                    else:
-                        recency_score = 40.0
-                else:
-                    recency_score = 0.0
+                recency_score = calculate_recency_score(podcast.get('last_updated'))
 
                 # Calculate weighted aggregate score
                 weights = {
@@ -388,55 +362,8 @@ def init_routes(app):
                 )
 
                 # Generate explanations
-                reasons = []
-                mismatches = []
-
-                # Relevance explanation
-                if relevance_score >= 90:
-                    reasons.append("Exceptional content match")
-                elif relevance_score >= 75:
-                    reasons.append("Strong content alignment")
-                elif relevance_score >= 60:
-                    reasons.append("Good content fit")
-                else:
-                    reasons.append("Moderate content match")
-                    mismatches.append("Content alignment could be stronger")
-
-                # Audience explanation
-                if audience_score >= 90:
-                    reasons.append("Exceptional listener engagement")
-                elif audience_score >= 75:
-                    reasons.append("Strong audience base")
-                elif audience_score >= 60:
-                    reasons.append("Good listener base")
-                else:
-                    reasons.append("Moderate audience reach")
-                    mismatches.append("Limited audience reach")
-
-                # Recency explanation
-                if recency_score >= 90:
-                    reasons.append("Very actively publishing")
-                elif recency_score >= 75:
-                    reasons.append("Recently active")
-                elif recency_score >= 60:
-                    reasons.append("Moderately active")
-                else:
-                    reasons.append("Less recent activity")
-                    mismatches.append("Publishing frequency could be more consistent")
-
-                if podcast.get('categories'):
-                    reasons.append(f"Topics: {podcast['categories']}")
-
-                logger.info(f"""
-                Podcast: {podcast['title']}
-                Detailed Scores:
-                - Relevance: {relevance_score:.1f}
-                - Audience: {audience_score:.1f}
-                - Guest Fit: {guest_fit_score:.1f}
-                - Recency: {recency_score:.1f}
-                - Host Interest: {host_interest_score:.1f}
-                - Aggregate: {aggregate_score:.1f}
-                """)
+                reason = generate_score_reason(podcast, relevance_score, audience_score, recency_score)
+                potential_mismatch = generate_mismatch_explanation(podcast, relevance_score, audience_score, recency_score)
 
                 final_scores.append({
                     "podcast_name": podcast['title'] or f"Podcast {podcast['id']}",
@@ -446,16 +373,215 @@ def init_routes(app):
                     "recency_score": round(recency_score, 1),
                     "host_interest_score": round(host_interest_score, 1),
                     "aggregate_score": round(aggregate_score, 1),
-                    "reason": " | ".join(reasons),
-                    "potential_mismatch": " | ".join(mismatches) if mismatches else "No significant concerns identified"
+                    "reason": reason,
+                    "potential_mismatch": potential_mismatch
                 })
 
             # Sort by aggregate score
             final_scores.sort(key=lambda x: x["aggregate_score"], reverse=True)
             return jsonify(final_scores)
-
+        
+        
         except Exception as e:
             logger.error(f"Error in match_podcasts: {str(e)}")
             return jsonify({"error": f"An error occurred during matching: {str(e)}"}), 500
+
+    @app.route('/get_podcast_stats')
+    def get_podcast_stats():
+        try:
+            client_id = request.args.get("client_id")
+            if not client_id:
+                return jsonify({"error": "Client ID is missing."}), 400
+
+            podcasts = supabase.table('podcasts')\
+                .select('listen_score,global_rank,last_updated')\
+                .eq('client_id', client_id)\
+                .execute()
+
+            if not podcasts.data:
+                return jsonify({
+                    "total_podcasts": 0,
+                    "avg_listen_score": 0,
+                    "high_performing": 0,
+                    "recently_active": 0
+                })
+
+            total_podcasts = len(podcasts.data)
+            valid_scores = [p['listen_score'] for p in podcasts.data if p.get('listen_score') is not None]
+            avg_listen_score = sum(valid_scores) / len(valid_scores) if valid_scores else 0
+            high_performing = len([s for s in valid_scores if s >= 80])
+            
+            from datetime import datetime, timedelta
+            recent_cutoff = datetime.now() - timedelta(days=30)
+            recently_active = len([
+                p for p in podcasts.data 
+                if p.get('last_updated') and 
+                datetime.strptime(p['last_updated'], '%m-%d-%Y') > recent_cutoff
+            ])
+
+            return jsonify({
+                "total_podcasts": total_podcasts,
+                "avg_listen_score": round(avg_listen_score, 1),
+                "high_performing": high_performing,
+                "recently_active": recently_active
+            })
+
+        except Exception as e:
+            logger.error(f"Error getting podcast stats: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/update_podcast_status', methods=['POST'])
+    def update_podcast_status():
+        try:
+            data = request.get_json()
+            podcast_id = data.get('podcast_id')
+            new_status = data.get('status')
+
+            if not podcast_id or not new_status:
+                return jsonify({"error": "Missing required fields"}), 400
+
+            supabase.table('podcasts')\
+                .update({"status": new_status})\
+                .eq('id', podcast_id)\
+                .execute()
+
+            return jsonify({"success": True, "message": "Status updated successfully"})
+
+        except Exception as e:
+            logger.error(f"Error updating podcast status: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/delete_podcast', methods=['POST'])
+    def delete_podcast():
+        try:
+            data = request.get_json()
+            podcast_id = data.get('podcast_id')
+
+            if not podcast_id:
+                return jsonify({"error": "Podcast ID is required"}), 400
+
+            # Delete associated episodes first
+            supabase.table('episodes')\
+                .delete()\
+                .eq('podcast_id', podcast_id)\
+                .execute()
+
+            # Then delete the podcast
+            supabase.table('podcasts')\
+                .delete()\
+                .eq('id', podcast_id)\
+                .execute()
+
+            return jsonify({
+                "success": True, 
+                "message": "Podcast and associated episodes deleted successfully"
+            })
+
+        except Exception as e:
+            logger.error(f"Error deleting podcast: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/clear_client_data', methods=['POST'])
+    def clear_client_data():
+        try:
+            data = request.get_json()
+            client_id = data.get('client_id')
+
+            if not client_id:
+                return jsonify({"error": "Client ID is required"}), 400
+
+            # Delete all client data
+            supabase.table('client_data')\
+                .delete()\
+                .eq('client_id', client_id)\
+                .execute()
+
+            return jsonify({
+                "success": True,
+                "message": "Client data cleared successfully"
+            })
+
+        except Exception as e:
+            logger.error(f"Error clearing client data: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/export_matches', methods=['GET'])
+    def export_matches():
+        try:
+            client_id = request.args.get("client_id")
+            if not client_id:
+                return jsonify({"error": "Client ID is required"}), 400
+
+            # Get client name
+            client = supabase.table('clients')\
+                .select('name')\
+                .eq('id', client_id)\
+                .execute()
+            
+            client_name = client.data[0]['name'] if client.data else "Unknown Client"
+
+            # Get matched podcasts
+            matches = supabase.table('podcasts')\
+                .select('*')\
+                .eq('client_id', client_id)\
+                .execute()
+
+            if not matches.data:
+                return jsonify({"error": "No matches found"}), 404
+
+            # Create CSV content
+            output = StringIO()
+            writer = csv.writer(output)
+            
+            # Write headers
+            writer.writerow([
+                'Podcast Name',
+                'Listen Score',
+                'Global Rank',
+                'Categories',
+                'Contact Name',
+                'Contact Email',
+                'ListenNotes URL',
+                'RSS Feed',
+                'Last Updated'
+            ])
+
+            # Write data
+            for match in matches.data:
+                writer.writerow([
+                    match.get('title', ''),
+                    match.get('listen_score', ''),
+                    f"{(match.get('global_rank', 0) * 100):.1f}%",
+                    match.get('categories', ''),
+                    match.get('contact_name', ''),
+                    match.get('contact_email', ''),
+                    match.get('listennotes_url', ''),
+                    match.get('rss_feed', ''),
+                    match.get('last_updated', '')
+                ])
+
+            # Create response
+            from flask import Response
+            output.seek(0)
+            return Response(
+                output.getvalue(),
+                mimetype='text/csv',
+                headers={
+                    "Content-Disposition": f"attachment;filename=podcast_matches_{client_name}.csv"
+                }
+            )
+
+        except Exception as e:
+            logger.error(f"Error exporting matches: {str(e)}")
+            return jsonify({"error": str(e)}), 500
+
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return jsonify({"error": "Resource not found"}), 404
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        logger.error(f"Internal server error: {str(error)}")
+        return jsonify({"error": "Internal server error"}), 500
 
     return app
