@@ -4,6 +4,7 @@ import logging
 import openai
 import psutil
 import gc
+import time
 from dotenv import load_dotenv
 from routes import init_routes
 from database import supabase
@@ -50,23 +51,38 @@ def create_app():
         Flask: Configured Flask application
     """
     try:
-        # Create Flask app with static file configuration
+        # Create Flask app with optimized configuration
         app = Flask(__name__,
                    static_url_path='/static',
-                   static_folder='static')
+                   static_folder='static',
+                   instance_relative_config=True)
         
         # Enable CORS
         CORS(app)
 
-        # Basic configuration with memory optimizations
+        # Optimized configuration
         app.config.update(
             SECRET_KEY=os.getenv('SECRET_KEY', 'your_secret_key_here'),
             MAX_CONTENT_LENGTH=5 * 1024 * 1024,  # 5MB max file size
             UPLOAD_FOLDER=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads'),
             ALLOWED_EXTENSIONS={'txt', 'docx', 'html', 'csv'},
-            UPLOAD_CHUNK_SIZE=1024 * 1024,  # 1MB chunks for file processing
-            MAX_POOL_SIZE=5,  # Limit database connection pool
-            BATCH_SIZE=50     # Batch size for database operations
+            UPLOAD_CHUNK_SIZE=512 * 1024,  # 512KB chunks
+            MAX_POOL_SIZE=3,               # Reduced pool size
+            BATCH_SIZE=25,                 # Smaller batch size
+            PERMANENT_SESSION_LIFETIME=1800,
+            SEND_FILE_MAX_AGE_DEFAULT=0,
+            JSON_SORT_KEYS=False,
+            SESSION_COOKIE_SECURE=True,
+            # Gunicorn settings
+            WORKERS=2,
+            WORKER_CLASS='sync',
+            WORKER_CONNECTIONS=100,
+            TIMEOUT=30,
+            KEEPALIVE=2,
+            # Flask optimizations
+            TEMPLATES_AUTO_RELOAD=False,
+            PROPAGATE_EXCEPTIONS=True,
+            PRESERVE_CONTEXT_ON_EXCEPTION=False
         )
 
         # Ensure upload folder exists
@@ -77,6 +93,12 @@ def create_app():
         if not openai.api_key:
             logger.error("OpenAI API key not found in environment variables")
             raise ValueError("OpenAI API key not configured")
+
+        # Add server-timing header
+        @app.after_request
+        def add_server_timing(response):
+            response.headers.add('Server-Timing', f'app;dur={time.time()*1000}')
+            return response
 
         # Add static file handler
         @app.route('/static/<path:filename>')
