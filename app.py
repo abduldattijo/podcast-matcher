@@ -5,6 +5,7 @@ import openai
 from dotenv import load_dotenv
 from routes import init_routes
 from database import supabase
+from flask import Flask, render_template, session
 
 # Set up logging
 logging.basicConfig(
@@ -21,6 +22,22 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Create Flask app
 app = Flask(__name__)
+
+# In app.py
+app.render_template
+# Add these lines
+@app.after_request
+def after_request(response):
+    session.pop('_flashes', None)
+    return response
+
+def store_in_session(key, value):
+    if len(str(value)) > 3000:
+        return False
+    session[key] = value
+    return True
+
+# Rest of your app.py code...
 
 # Basic configuration
 app.secret_key = os.getenv('SECRET_KEY', 'your_secret_key')
