@@ -224,7 +224,7 @@ function toggleClientInput() {
                 }, 1000);
  
                 // Wait 30 seconds before checking status
-                await new Promise(resolve => setTimeout(resolve, 3500));
+                await new Promise(resolve => setTimeout(resolve, 750000));
  
                 let completed = false;
                 let retries = 0;
