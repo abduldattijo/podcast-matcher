@@ -63,7 +63,7 @@ def create_app():
         # Optimized configuration
         app.config.update(
             SECRET_KEY=os.getenv('SECRET_KEY', 'your_secret_key_here'),
-            MAX_CONTENT_LENGTH=5 * 1024 * 1024,  # 5MB max file size
+            MAX_CONTENT_LENGTH=60 * 1024 * 1024,  # 5MB max file size
             UPLOAD_FOLDER=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'uploads'),
             ALLOWED_EXTENSIONS={'txt', 'docx', 'html', 'csv'},
             UPLOAD_CHUNK_SIZE=512 * 1024,  # 512KB chunks
