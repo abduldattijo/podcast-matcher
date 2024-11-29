@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+
 import os
 import logging
 import openai
@@ -24,7 +24,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 app = Flask(__name__)
 
 # In app.py
-app.render_template
+
 # Add these lines
 @app.after_request
 def after_request(response):
