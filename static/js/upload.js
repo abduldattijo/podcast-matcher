@@ -154,31 +154,6 @@ function toggleClientInput() {
     });
  }
  
- async function waitForUploadCompletion(clientId) {
-    let retries = 0;
-    const maxRetries = 60; // 5 minutes total (5s interval)
-    
-    while (retries < maxRetries) {
-        try {
-            const response = await fetch(`/upload_status?client_id=${clientId}`);
-            const data = await response.json();
-            
-            if (data.status === 'complete') {
-                return true;
-            } else if (data.status === 'error') {
-                return false;
-            }
-            
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
-            retries++;
-        } catch (error) {
-            console.error('Error checking upload status:', error);
-            return false;
-        }
-    }
-    return false;
- }
- 
  document.addEventListener('DOMContentLoaded', function() {
     const clientForm = document.getElementById('clientForm');
     const podcastForm = document.getElementById('podcastForm');
@@ -239,36 +214,59 @@ function toggleClientInput() {
                     body: formData
                 });
  
-                if (response.ok) {
-                    // Start progress animation
-                    let progress = 10;
-                    const progressInterval = setInterval(() => {
-                        progress += 1;
-                        if (progress <= 90) {
-                            updateProgress(progressDiv, progress);
-                        }
-                    }, 3000);
- 
-                    // Wait for upload completion
-                    const uploadCompleted = await waitForUploadCompletion(clientId);
-                    clearInterval(progressInterval);
- 
-                    if (uploadCompleted) {
-                        updateProgress(progressDiv, 100);
-                        setTimeout(() => {
-                            progressDiv.classList.add('hidden');
-                            showSuccessMessage("Podcast data uploaded successfully!");
-                            document.getElementById('selectedPodcastFile').innerHTML = '';
-                            form.reset();
-                        }, 1000);
-                    } else {
-                        throw new Error('Upload timed out');
+                // Start progress animation
+                let currentProgress = 10;
+                const progressInterval = setInterval(() => {
+                    if (currentProgress < 95) {
+                        currentProgress += 1;
+                        updateProgress(progressDiv, currentProgress);
                     }
-                } else {
-                    throw new Error('Upload failed');
+                }, 1000);
+ 
+                // Wait 30 seconds before checking status
+                await new Promise(resolve => setTimeout(resolve, 300000000));
+ 
+                let completed = false;
+                let retries = 0;
+                const maxRetries = 30;
+ 
+                while (!completed && retries < maxRetries) {
+                    try {
+                        const statusResponse = await fetch(`/upload_status?client_id=${clientId}`);
+                        const statusData = await statusResponse.json();
+ 
+                        if (statusData.status === 'complete') {
+                            completed = true;
+                            clearInterval(progressInterval);
+                            updateProgress(progressDiv, 100);
+                            setTimeout(() => {
+                                progressDiv.classList.add('hidden');
+                                showSuccessMessage("Podcast data uploaded successfully!");
+                                document.getElementById('selectedPodcastFile').innerHTML = '';
+                                form.reset();
+                            }, 1000);
+                            break;
+                        }
+ 
+                        if (statusData.status === 'error') {
+                            throw new Error('Upload failed');
+                        }
+ 
+                        await new Promise(resolve => setTimeout(resolve, 5000));
+                        retries++;
+                    } catch (error) {
+                        console.error('Status check error:', error);
+                        throw error;
+                    }
                 }
+ 
+                if (!completed) {
+                    throw new Error('Upload timed out');
+                }
+ 
             } catch (error) {
                 console.error('Upload error:', error);
+                clearInterval(progressInterval);
                 progressDiv.classList.add('hidden');
                 alert('Error uploading file. Please try again.');
             }
