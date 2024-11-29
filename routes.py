@@ -7,11 +7,12 @@ from docx import Document
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
+from matching import calculate_relevance_score
 from typing import Generator
+from matching import calculate_guest_fit_score
+
 import itertools
 import gc
-from matching import calculate_guest_fit_score
-from matching import calculate_relevance_score
 from utils import (
     create_embedding, 
     generate_score_reason, 
@@ -51,12 +52,9 @@ def extract_text_from_html(html_content):
     """Extract clean text from HTML content."""
     try:
         soup = BeautifulSoup(html_content, 'html.parser')
-        # Remove script and style elements
         for script in soup(["script", "style"]):
             script.decompose()
-        # Get text
         text = soup.get_text()
-        # Clean up whitespace
         lines = (line.strip() for line in text.splitlines())
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
         text = ' '.join(chunk for chunk in chunks if chunk)
@@ -65,10 +63,36 @@ def extract_text_from_html(html_content):
         logger.error(f"Error extracting text from HTML: {str(e)}")
         return None
 
-def process_podcast_batch(podcasts, client_embeddings, batch_size):
-    """Process a batch of podcasts for scoring."""
-    scores = []
+def cleanup_memory():
+    """Force garbage collection."""
+    gc.collect()
+
+def process_single_podcast(podcast):
+    """Process a single podcast with memory cleanup."""
+    try:
+        from main import process_podcast
+        process_podcast(podcast, supabase)
+    except Exception as e:
+        logger.error(f"Single podcast error: {str(e)}")
+    finally:
+        cleanup_memory()
+
+def process_podcast_batch(podcasts):
+    """Process a batch of podcasts with memory cleanup."""
     for podcast in podcasts:
+        try:
+            response = supabase.table('podcasts').insert(podcast).execute()
+            if response.data:
+                process_single_podcast(response.data[0])
+        except Exception as e:
+            logger.error(f"Podcast processing error: {str(e)}")
+        finally:
+            cleanup_memory()
+
+def process_podcast_scores(client_embeddings, podcast_batch, batch_size):
+    """Process podcast scoring with memory management."""
+    scores = []
+    for podcast in podcast_batch:
         try:
             if not podcast.get('embedding'):
                 continue
@@ -77,18 +101,19 @@ def process_podcast_batch(podcasts, client_embeddings, batch_size):
             if not embedding:
                 continue
 
-            # Calculate scores
+            # Calculate scores with memory cleanup between operations
             relevance_score = calculate_relevance_score(
                 client_embeddings, 
                 embedding, 
                 podcast.get('categories', '')
             )
+            cleanup_memory()
             
             audience_score = float(podcast['listen_score']) if podcast.get('listen_score') else 0.0
             recency_score = calculate_recency_score(podcast.get('last_updated'))
             host_interest_score = 100.0 * (1 - podcast['global_rank'])
 
-            # Get episodes in batches
+            # Get episodes in batches with memory cleanup
             episode_embeddings = []
             offset = 0
             while True:
@@ -106,6 +131,8 @@ def process_podcast_batch(podcasts, client_embeddings, batch_size):
                         episode_embeddings.append(embedding)
                 
                 offset += batch_size
+                cleanup_memory()
+                
                 if len(episodes.data) < batch_size:
                     break
 
@@ -114,6 +141,7 @@ def process_podcast_batch(podcasts, client_embeddings, batch_size):
                 client_embeddings,
                 episode_embeddings
             )
+            cleanup_memory()
 
             # Calculate aggregate score
             weights = {
@@ -144,8 +172,7 @@ def process_podcast_batch(podcasts, client_embeddings, batch_size):
                 "potential_mismatch": generate_mismatch_explanation(podcast, relevance_score, audience_score, recency_score)
             })
 
-            # Free memory
-            gc.collect()
+            cleanup_memory()
 
         except Exception as e:
             logger.error(f"Error processing podcast {podcast.get('id')}: {str(e)}")
@@ -156,33 +183,39 @@ def process_podcast_batch(podcasts, client_embeddings, batch_size):
 def init_routes(app):
     @app.route('/')
     def index():
+        cleanup_memory()
         return redirect(url_for('upload_combined'))
 
     @app.route('/upload_combined')
     def upload_combined():
         try:
+            cleanup_memory()
             response = supabase.table('clients').select('*').execute()
             clients = response.data
             return render_template('upload.html', clients=clients)
         except Exception as e:
             logger.error(f"Error fetching clients: {str(e)}")
             flash("Error loading clients")
+            cleanup_memory()
             return render_template('upload.html', clients=[])
 
     @app.route('/get_clients')
     def get_clients():
         try:
+            cleanup_memory()
             response = supabase.table('clients').select('*').execute()
             return jsonify(response.data)
         except Exception as e:
             logger.error(f"Error fetching clients: {str(e)}")
+            cleanup_memory()
             return jsonify({"error": str(e)}), 500
 
     @app.route('/upload_client', methods=['POST'])
     def upload_client():
         try:
+            cleanup_memory()
             client_id = request.form.get("client_id")
-            BATCH_SIZE = app.config['BATCH_SIZE']
+            chunk_size = app.config['UPLOAD_CHUNK_SIZE']
 
             if client_id == 'new':
                 client_name = request.form.get("newClientNameInput")
@@ -206,10 +239,14 @@ def init_routes(app):
                     filename = secure_filename(file.filename)
                     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     
-                    # Save file in chunks
+                    # Stream file writing
                     with open(filepath, 'wb') as f:
-                        for chunk in file.stream:
+                        while True:
+                            chunk = file.stream.read(chunk_size)
+                            if not chunk:
+                                break
                             f.write(chunk)
+                            cleanup_memory()
 
                     try:
                         transcription = extract_text_content(filepath, filename.split('.')[-1].lower())
@@ -219,14 +256,15 @@ def init_routes(app):
                         logger.error(f"Error processing {filename}: {str(e)}")
                         transcription = f"Error processing file: {str(e)}"
 
-                    # Process embedding in chunks if text is large
-                    if len(transcription) > 10000:  # Arbitrary threshold
+                    # Process embedding in chunks
+                    if len(transcription) > 10000:
                         chunks = [transcription[i:i+10000] for i in range(0, len(transcription), 10000)]
                         embeddings = []
                         for chunk in chunks:
                             chunk_embedding = create_embedding(chunk)
                             if chunk_embedding is not None:
                                 embeddings.append(chunk_embedding)
+                            cleanup_memory()
                         if embeddings:
                             embedding = np.mean(embeddings, axis=0)
                         else:
@@ -243,124 +281,88 @@ def init_routes(app):
                             "embedding": str(embedding_list)
                         }).execute()
 
-                    # Clean up uploaded file
                     try:
                         os.remove(filepath)
                     except Exception as e:
                         logger.error(f"Error removing temporary file {filepath}: {str(e)}")
 
-                    # Free memory
-                    gc.collect()
+                    cleanup_memory()
 
             flash("Client data uploaded successfully.")
             return redirect(url_for('upload_combined'))
 
         except Exception as e:
             logger.error(f"Error in upload_client: {str(e)}")
+            cleanup_memory()
             flash(f"Error uploading client data: {str(e)}")
             return redirect(url_for('upload_combined'))
 
     @app.route('/upload_podcast', methods=['POST'])
     def upload_podcast():
         try:
-            from main import process_podcast
-            BATCH_SIZE = app.config['BATCH_SIZE']
-
+            cleanup_memory()
             client_id = request.form.get("client_id")
             if not client_id:
-                flash("Please select a client.")
-                return redirect(url_for('upload_combined'))
+                return jsonify({"error": "Client ID required"}), 400
 
             if 'file' not in request.files:
-                flash('No file selected.')
-                return redirect(url_for('upload_combined'))
+                return jsonify({"error": "No file uploaded"}), 400
 
             file = request.files['file']
-            if file.filename == '':
-                flash('No file selected.')
-                return redirect(url_for('upload_combined'))
+            if not file.filename:
+                return jsonify({"error": "No file selected"}), 400
 
-            if file:
-                # Process CSV in chunks
-                csv_data = StringIO()
-                for chunk in process_file_in_chunks(file):
-                    csv_data.write(chunk)
-                csv_data.seek(0)
-                
-                csv_reader = csv.DictReader(csv_data)
-                rows = list(csv_reader)
-                
-                new_podcasts = []
-                updated_podcasts = []
-                skipped_podcasts = []
+            # Stream process the CSV
+            stream = StringIO()
+            chunk_size = app.config['UPLOAD_CHUNK_SIZE']
+            while True:
+                chunk = file.read(chunk_size).decode('utf-8')
+                if not chunk:
+                    break
+                stream.write(chunk)
+                cleanup_memory()
 
-                # Process podcasts in batches
-                for batch in batch_db_operations(rows, BATCH_SIZE):
-                    for row in batch:
-                        try:
-                            existing_podcast = supabase.table('podcasts')\
-                                .select('*')\
-                                .eq('rss_feed', row['RSS Feed'])\
-                                .eq('client_id', client_id)\
-                                .execute()
+            stream.seek(0)
+            reader = csv.DictReader(stream)
+            podcasts = []
 
-                            other_client_podcast = supabase.table('podcasts')\
-                                .select('*')\
-                                .eq('rss_feed', row['RSS Feed'])\
-                                .neq('client_id', client_id)\
-                                .execute()
+            # Collect podcast data
+            for row in reader:
+                try:
+                    podcasts.append({
+                        "client_id": client_id,
+                        "search_term": row['Search Term'][:100],
+                        "listennotes_url": row['ListenNotes URL'][:255],
+                        "listen_score": int(row['ListenScore']),
+                        "global_rank": float(row['Global Rank'].strip('%')) / 100,
+                        "rss_feed": row['RSS Feed'][:255],
+                        "status": "New"
+                    })
+                except (ValueError, KeyError) as e:
+                    logger.error(f"Error parsing row: {str(e)}")
+                    continue
 
-                            if existing_podcast.data:
-                                podcast = existing_podcast.data[0]
-                                if podcast['status'] != 'Done':
-                                    process_podcast(podcast, supabase)
-                                    updated_podcasts.append(podcast['title'] or row['RSS Feed'])
-                                else:
-                                    skipped_podcasts.append(podcast['title'] or row['RSS Feed'])
-                            else:
-                                new_podcast = {
-                                    "client_id": client_id,
-                                    "search_term": row['Search Term'][:100],
-                                    "listennotes_url": row['ListenNotes URL'][:255],
-                                    "listen_score": int(row['ListenScore']),
-                                    "global_rank": float(row['Global Rank'].strip('%')) / 100,
-                                    "rss_feed": row['RSS Feed'][:255],
-                                    "status": "New"
-                                }
-                                
-                                response = supabase.table('podcasts').insert(new_podcast).execute()
-                                new_podcast_data = response.data[0]
-                                
-                                process_podcast(new_podcast_data, supabase)
-                                new_podcasts.append(new_podcast_data['title'] or row['RSS Feed'])
+                if len(podcasts) >= 10:  # Process in small batches
+                    process_podcast_batch(podcasts)
+                    podcasts = []
+                    cleanup_memory()
 
-                                if other_client_podcast.data:
-                                    flash(f"Note: Podcast '{row['RSS Feed']}' also exists for another client")
+            # Process remaining podcasts
+            if podcasts:
+                process_podcast_batch(podcasts)
 
-                            # Free memory
-                            gc.collect()
-
-                        except Exception as e:
-                            logger.error(f"Error processing podcast row: {str(e)}")
-                            flash(f"Error processing podcast: {row['RSS Feed']}")
-
-                if new_podcasts:
-                    flash(f"Added {len(new_podcasts)} new podcasts: {', '.join(new_podcasts)}")
-                if updated_podcasts:
-                    flash(f"Updated {len(updated_podcasts)} existing podcasts: {', '.join(updated_podcasts)}")
-                if skipped_podcasts:
-                    flash(f"Skipped {len(skipped_podcasts)} already processed podcasts: {', '.join(skipped_podcasts)}")
-
-            return redirect(url_for('upload_combined'))
+            cleanup_memory()
+            return jsonify({"success": True})
 
         except Exception as e:
-            logger.error(f"Error in upload_podcast: {str(e)}")
-            flash(f"Error: {str(e)}")
-            return redirect(url_for('upload_combined'))
+            logger.error(f"Upload error: {str(e)}")
+            cleanup_memory()
+            return jsonify({"error": str(e)}), 500
 
     @app.route('/match_podcasts')
     def match_podcasts():
         try:
+            cleanup_memory()
             client_id = request.args.get("client_id")
             min_score = float(request.args.get("min_score", 20))
             max_score = float(request.args.get("max_score", 100))
@@ -388,6 +390,7 @@ def init_routes(app):
                         client_embeddings.append(embedding)
                 
                 offset += BATCH_SIZE
+                cleanup_memory()
                 
                 if len(batch.data) < BATCH_SIZE:
                     break
@@ -396,7 +399,7 @@ def init_routes(app):
                 return jsonify({"error": "No valid client embeddings found."}), 400
 
             # Get podcasts in batches
-            podcasts = []
+            valid_podcasts = []
             offset = 0
             while True:
                 batch = supabase.table('podcasts')\
@@ -407,64 +410,60 @@ def init_routes(app):
                 
                 if not batch.data:
                     break
-                    
-                podcasts.extend(batch.data)
+
+                # Filter and validate podcasts
+                for podcast in batch.data:
+                    try:
+                        if podcast.get('embedding'):
+                            embedding = parse_embedding_string(podcast['embedding'])
+                            if embedding:
+                                listen_score = podcast.get('listen_score')
+                                
+                                if listen_score is None:
+                                    if include_blank:
+                                        podcast['embedding'] = embedding
+                                        valid_podcasts.append(podcast)
+                                else:
+                                    score = float(listen_score)
+                                    if min_score <= score <= max_score:
+                                        podcast['embedding'] = embedding
+                                        valid_podcasts.append(podcast)
+                                        
+                    except (ValueError, TypeError) as e:
+                        logger.warning(f"Invalid listen score for podcast {podcast.get('id')}: {e}")
+                        continue
+                
                 offset += BATCH_SIZE
+                cleanup_memory()
                 
                 if len(batch.data) < BATCH_SIZE:
                     break
-                if not podcasts:
-                    return jsonify({"error": "No podcasts found."}), 400
-
-            # Apply listen score filter and parse embeddings
-            valid_podcasts = []
-            for podcast in podcasts:
-                try:
-                    if podcast.get('embedding'):
-                        embedding = parse_embedding_string(podcast['embedding'])
-                        if embedding:
-                            listen_score = podcast.get('listen_score')
-                            
-                            # Handle listen score filtering
-                            if listen_score is None:
-                                if include_blank:
-                                    podcast['embedding'] = embedding
-                                    valid_podcasts.append(podcast)
-                            else:
-                                score = float(listen_score)
-                                if min_score <= score <= max_score:
-                                    podcast['embedding'] = embedding
-                                    valid_podcasts.append(podcast)
-                                    
-                except (ValueError, TypeError) as e:
-                    logger.warning(f"Invalid listen score for podcast {podcast.get('id')}: {e}")
-                    continue
 
             if not valid_podcasts:
-                return jsonify({"error": "No valid podcast matches found with the selected filters."}), 400
+               return jsonify({"error": "No valid podcast matches found with the selected filters."}), 400
 
-            # Process matches in batches
+            # Process matches in batches with memory cleanup
             final_scores = []
             for podcast_batch in batch_db_operations(valid_podcasts, BATCH_SIZE):
-                batch_scores = process_podcast_batch(
-                    podcast_batch, 
-                    client_embeddings,
+                batch_scores = process_podcast_scores(
+                    client_embeddings, 
+                    podcast_batch,
                     BATCH_SIZE
                 )
                 final_scores.extend(batch_scores)
-
-            # Clean up memory
-            gc.collect()
+                cleanup_memory()
 
             return jsonify(sorted(final_scores, key=lambda x: x["aggregate_score"], reverse=True))
 
         except Exception as e:
             logger.error(f"Error in match_podcasts: {str(e)}")
+            cleanup_memory()
             return jsonify({"error": str(e)}), 500
 
     @app.route('/get_podcast_stats')
     def get_podcast_stats():
         try:
+            cleanup_memory()
             client_id = request.args.get("client_id")
             if not client_id:
                 return jsonify({"error": "Client ID is missing."}), 400
@@ -482,22 +481,20 @@ def init_routes(app):
                     "recently_active": 0
                 })
 
+            from datetime import datetime, timedelta
+            recent_cutoff = datetime.now() - timedelta(days=30)
+            
             total_podcasts = len(podcasts.data)
             valid_scores = [p['listen_score'] for p in podcasts.data if p.get('listen_score') is not None]
             avg_listen_score = sum(valid_scores) / len(valid_scores) if valid_scores else 0
             high_performing = len([s for s in valid_scores if s >= 80])
-            
-            from datetime import datetime, timedelta
-            recent_cutoff = datetime.now() - timedelta(days=30)
             recently_active = len([
                 p for p in podcasts.data 
                 if p.get('last_updated') and 
                 datetime.strptime(p['last_updated'], '%m-%d-%Y') > recent_cutoff
             ])
 
-            # Clean up memory
-            gc.collect()
-
+            cleanup_memory()
             return jsonify({
                 "total_podcasts": total_podcasts,
                 "avg_listen_score": round(avg_listen_score, 1),
@@ -507,11 +504,13 @@ def init_routes(app):
 
         except Exception as e:
             logger.error(f"Error getting podcast stats: {str(e)}")
+            cleanup_memory()
             return jsonify({"error": str(e)}), 500
 
     @app.route('/export_matches', methods=['GET'])
     def export_matches():
         try:
+            cleanup_memory()
             client_id = request.args.get("client_id")
             if not client_id:
                 return jsonify({"error": "Client ID is required"}), 400
@@ -541,6 +540,7 @@ def init_routes(app):
                     
                 matches.extend(batch.data)
                 offset += BATCH_SIZE
+                cleanup_memory()
                 
                 if len(batch.data) < BATCH_SIZE:
                     break
@@ -579,23 +579,25 @@ def init_routes(app):
                         match.get('rss_feed', ''),
                         match.get('last_updated', '')
                     ])
-
-            # Clean up memory
-            gc.collect()
+                cleanup_memory()
 
             # Create response
             from flask import Response
             output.seek(0)
-            return Response(
+            response = Response(
                 output.getvalue(),
                 mimetype='text/csv',
                 headers={
                     "Content-Disposition": f"attachment;filename=podcast_matches_{client_name}.csv"
                 }
             )
+            
+            cleanup_memory()
+            return response
 
         except Exception as e:
             logger.error(f"Error exporting matches: {str(e)}")
+            cleanup_memory()
             return jsonify({"error": str(e)}), 500
 
-    return app   
+    return app
