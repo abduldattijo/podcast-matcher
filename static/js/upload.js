@@ -119,9 +119,7 @@ function toggleClientInput() {
     const successMessage = document.getElementById('successMessage');
     successMessage.textContent = message;
     successMessage.classList.add('show');
-    
     await new Promise(resolve => setTimeout(resolve, 3000));
-    
     successMessage.classList.remove('show');
  }
  
@@ -169,42 +167,45 @@ function toggleClientInput() {
  
             try {
                 progressDiv.classList.remove('hidden');
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 5;
-                    if (progress <= 90) {
-                        updateProgress(progressDiv, progress);
-                    }
-                }, 300);
- 
                 const response = await fetch(form.action, {
                     method: 'POST',
-                    body: formData,
-                    timeout: 300000  // 5 minutes timeout
+                    body: formData
                 });
  
-                clearInterval(interval);
-                updateProgress(progressDiv, 100);
- 
                 if (response.ok) {
-                    const clientResponse = await fetch('/get_clients');
-                    const clients = await clientResponse.json();
-                    updateClientDropdowns(clients);
-                    
-                    setTimeout(() => {
-                        progressDiv.classList.add('hidden');
-                        updateProgress(progressDiv, 0);
-                        showSuccessMessage("Client files uploaded successfully!");
-                        document.getElementById('selectedClientFiles').innerHTML = '';
-                        form.reset();
-                    }, 500);
-                } else {
-                    throw new Error('Upload failed');
+                    let progress = 0;
+                    const checkStatus = setInterval(async () => {
+                        progress += 1;
+                        if (progress <= 95) {
+                            updateProgress(progressDiv, progress);
+                        }
+                        
+                        try {
+                            const statusResponse = await fetch('/upload_status');
+                            const data = await statusResponse.json();
+                            
+                            if (data.status === 'complete') {
+                                clearInterval(checkStatus);
+                                updateProgress(progressDiv, 100);
+                                
+                                const clientResponse = await fetch('/get_clients');
+                                const clients = await clientResponse.json();
+                                updateClientDropdowns(clients);
+                                
+                                progressDiv.classList.add('hidden');
+                                showSuccessMessage("Client files uploaded successfully!");
+                                document.getElementById('selectedClientFiles').innerHTML = '';
+                                form.reset();
+                            }
+                        } catch (error) {
+                            console.error('Error checking upload status:', error);
+                        }
+                    }, 2000);
                 }
             } catch (error) {
-                alert('Error uploading files. Please try again.');
+                console.error('Upload error:', error);
                 progressDiv.classList.add('hidden');
-                updateProgress(progressDiv, 0);
+                alert('Error uploading files. Please try again.');
             }
         });
     }
@@ -218,38 +219,40 @@ function toggleClientInput() {
  
             try {
                 progressDiv.classList.remove('hidden');
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 5;
-                    if (progress <= 90) {
-                        updateProgress(progressDiv, progress);
-                    }
-                }, 30000);
- 
                 const response = await fetch(form.action, {
                     method: 'POST',
-                    body: formData,
-                    timeout: 300000000  // 50 minutes timeout
+                    body: formData
                 });
  
-                clearInterval(interval);
-                updateProgress(progressDiv, 100);
- 
                 if (response.ok) {
-                    setTimeout(() => {
-                        progressDiv.classList.add('hidden');
-                        updateProgress(progressDiv, 0);
-                        showSuccessMessage("Podcast data uploaded successfully!");
-                        document.getElementById('selectedPodcastFile').innerHTML = '';
-                        form.reset();
-                    }, 500);
-                } else {
-                    throw new Error('Upload failed');
+                    let progress = 0;
+                    const checkStatus = setInterval(async () => {
+                        progress += 1;
+                        if (progress <= 95) {
+                            updateProgress(progressDiv, progress);
+                        }
+                        
+                        try {
+                            const statusResponse = await fetch('/upload_status');
+                            const data = await statusResponse.json();
+                            
+                            if (data.status === 'complete') {
+                                clearInterval(checkStatus);
+                                updateProgress(progressDiv, 100);
+                                progressDiv.classList.add('hidden');
+                                showSuccessMessage("Podcast data uploaded successfully!");
+                                document.getElementById('selectedPodcastFile').innerHTML = '';
+                                form.reset();
+                            }
+                        } catch (error) {
+                            console.error('Error checking upload status:', error);
+                        }
+                    }, 2000);
                 }
             } catch (error) {
-                alert('Error uploading file. Please try again.');
+                console.error('Upload error:', error);
                 progressDiv.classList.add('hidden');
-                updateProgress(progressDiv, 0);
+                alert('Error uploading file. Please try again.');
             }
         });
     }

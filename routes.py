@@ -583,5 +583,9 @@ def init_routes(app):
     def internal_error(error):
         logger.error(f"Internal server error: {str(error)}")
         return jsonify({"error": "Internal server error"}), 500
+       
+    @app.route('/upload_status')
+    def upload_status():
+        return jsonify({"status": "complete"})
 
     return app
