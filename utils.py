@@ -4,8 +4,23 @@ from datetime import datetime
 import logging
 from typing import Optional, List, Dict, Union
 import re
-
+# Add to utils.py
+import psutil
+import gc
+import torch
 logger = logging.getLogger(__name__)
+
+
+
+
+def log_memory_usage():
+    process = psutil.Process()
+    logger.info(f"Memory usage: {process.memory_info().rss / 1024 / 1024:.2f} MB")
+    
+def cleanup_embeddings():
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()    
 
 def create_embedding(text: str) -> Optional[List[float]]:
     """
