@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 import os
 import logging
 import openai
@@ -50,8 +50,10 @@ def create_app():
         Flask: Configured Flask application
     """
     try:
-        # Create Flask app
-        app = Flask(__name__)
+        # Create Flask app with static file configuration
+        app = Flask(__name__,
+                   static_url_path='/static',
+                   static_folder='static')
         
         # Enable CORS
         CORS(app)
@@ -75,6 +77,11 @@ def create_app():
         if not openai.api_key:
             logger.error("OpenAI API key not found in environment variables")
             raise ValueError("OpenAI API key not configured")
+
+        # Add static file handler
+        @app.route('/static/<path:filename>')
+        def serve_static(filename):
+            return send_from_directory(app.static_folder, filename)
 
         # Log initial memory usage
         log_memory_usage()
