@@ -4,68 +4,58 @@ from datetime import datetime
 import logging
 from typing import Optional, List, Dict, Union
 import re
-# Add to utils.py
-import psutil
-import gc
-import torch
+import time
+import backoff
+from docx import Document
+from bs4 import BeautifulSoup
+import os
+
 logger = logging.getLogger(__name__)
 
-
-
-
-def log_memory_usage():
-    process = psutil.Process()
-    logger.info(f"Memory usage: {process.memory_info().rss / 1024 / 1024:.2f} MB")
-    
-def cleanup_embeddings():
-    gc.collect()
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()    
-
+@backoff.on_exception(
+    backoff.expo,
+    (openai.error.Timeout, openai.error.APIError, openai.error.RateLimitError),
+    max_tries=3,
+    max_time=30
+)
 def create_embedding(text: str) -> Optional[List[float]]:
-    """
-    Create embedding for text using OpenAI's API with proper chunking for long texts.
-    
-    Args:
-        text (str): The text to create an embedding for
-        
-    Returns:
-        Optional[List[float]]: The embedding vector or None if there's an error
-    """
+    """Create embedding with retries and chunking."""
     try:
-        max_tokens = 8000
+        if not text:
+            return None
+            
+        max_tokens = 4000
         chunk_size = max_tokens
 
-        # Split text into chunks if it's too long
-        chunks = [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
-
+        chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
         embeddings = []
+
         for chunk in chunks:
-            response = openai.Embedding.create(
-                model="text-embedding-ada-002",
-                input=chunk
-            )
-            embedding = response['data'][0]['embedding']
-            embeddings.append(embedding)
+            try:
+                response = openai.Embedding.create(
+                    model="text-embedding-ada-002",
+                    input=chunk,
+                    timeout=10
+                )
+                embedding = response['data'][0]['embedding']
+                embeddings.append(embedding)
+                time.sleep(0.1)  # Rate limiting pause
+            except Exception as e:
+                logger.error(f"Chunk embedding error: {str(e)}")
+                continue
 
-        # Combine chunk embeddings by taking their mean
+        if not embeddings:
+            return None
+
         combined_embedding = np.mean(embeddings, axis=0)
-
         return combined_embedding.tolist()
+        
     except Exception as e:
         logger.error(f"Error creating embedding: {str(e)}")
         return None
 
 def format_date(date_str: str) -> str:
-    """
-    Format date string consistently.
-    
-    Args:
-        date_str (str): Date string in mm-dd-yyyy format
-        
-    Returns:
-        str: Formatted date string in yyyy-mm-dd format
-    """
+    """Format date string consistently."""
     try:
         date_obj = datetime.strptime(date_str, '%m-%d-%Y')
         return date_obj.strftime('%Y-%m-%d')
@@ -74,49 +64,27 @@ def format_date(date_str: str) -> str:
         return date_str
 
 def clean_filename(filename: str) -> str:
-    """
-    Clean filename for safe usage.
-    
-    Args:
-        filename (str): Original filename
-        
-    Returns:
-        str: Cleaned filename
-    """
-    # Remove invalid characters
-    cleaned = re.sub(r'[\\/*?:"<>|]', "", filename)
-    # Replace spaces with underscores
-    cleaned = cleaned.replace(' ', '_')
-    # Ensure filename is not too long
-    return cleaned[:255]
+    """Clean filename for safe usage."""
+    try:
+        cleaned = re.sub(r'[\\/*?:"<>|]', "", filename)
+        cleaned = cleaned.replace(' ', '_')
+        return cleaned[:255]
+    except Exception as e:
+        logger.error(f"Error cleaning filename: {str(e)}")
+        return filename
 
 def format_percentage(value: Union[float, str, None]) -> str:
-    """
-    Format float as percentage string.
-    
-    Args:
-        value (Union[float, str, None]): Number to format
-        
-    Returns:
-        str: Formatted percentage string
-    """
+    """Format float as percentage string."""
     try:
         if value is None:
             return "0.0%"
         return f"{float(value):.1f}%"
-    except (ValueError, TypeError):
+    except (ValueError, TypeError) as e:
+        logger.error(f"Error formatting percentage: {str(e)}")
         return "0.0%"
 
 def calculate_recency_score(last_updated: Optional[str]) -> float:
-    """
-    Calculate recency score based on last update date.
-    
-    Args:
-        last_updated (Optional[str]): Last update date string
-        
-    Returns:
-        float: Recency score from 0 to 100
-    """
+    """Calculate recency score with error handling."""
     try:
         if not last_updated:
             return 20.0
@@ -124,15 +92,15 @@ def calculate_recency_score(last_updated: Optional[str]) -> float:
         last_update = datetime.strptime(last_updated, '%m-%d-%Y')
         days_difference = (datetime.now() - last_update).days
         
-        if days_difference <= 7:       # Within week
+        if days_difference <= 7:
             return 100.0
-        elif days_difference <= 14:    # Within 2 weeks
+        elif days_difference <= 14:
             return 90.0
-        elif days_difference <= 30:    # Within month
+        elif days_difference <= 30:
             return 80.0
-        elif days_difference <= 60:    # Within 2 months
+        elif days_difference <= 60:
             return 70.0
-        elif days_difference <= 90:    # Within 3 months
+        elif days_difference <= 90:
             return 60.0
         else:
             return 40.0
@@ -141,115 +109,98 @@ def calculate_recency_score(last_updated: Optional[str]) -> float:
         return 20.0
 
 def generate_score_reason(podcast: Dict, relevance_score: float, audience_score: float, recency_score: float) -> str:
-    """
-    Generate explanation for podcast scores.
-    
-    Args:
-        podcast (Dict): Podcast data
-        relevance_score (float): Content relevance score
-        audience_score (float): Audience score
-        recency_score (float): Recency score
+    """Generate reason for scores with error handling."""
+    try:
+        reasons = []
         
-    Returns:
-        str: Detailed explanation of scores
-    """
-    reasons = []
-    
-    # Content relevance explanation
-    if relevance_score >= 90:
-        reasons.append("Exceptional content match")
-    elif relevance_score >= 75:
-        reasons.append("Strong content alignment")
-    elif relevance_score >= 60:
-        reasons.append("Good content fit")
-    else:
-        reasons.append("Moderate content relevance")
-    
-    # Audience explanation
-    if audience_score >= 90:
-        reasons.append("Exceptional listener engagement")
-    elif audience_score >= 75:
-        reasons.append("Strong audience base")
-    elif audience_score >= 60:
-        reasons.append("Good listener base")
-    else:
-        reasons.append("Moderate audience reach")
-    
-    # Recency explanation
-    if recency_score >= 90:
-        reasons.append("Very actively publishing")
-    elif recency_score >= 75:
-        reasons.append("Recently active")
-    elif recency_score >= 60:
-        reasons.append("Moderately active")
-    else:
-        reasons.append("Less recent activity")
-    
-    # Add categories if available
-    if podcast.get('categories'):
-        reasons.append(f"Topics: {podcast['categories']}")
-    
-    return " | ".join(reasons)
+        if relevance_score >= 90:
+            reasons.append("Exceptional content match")
+        elif relevance_score >= 75:
+            reasons.append("Strong content alignment")
+        elif relevance_score >= 60:
+            reasons.append("Good content fit")
+        else:
+            reasons.append("Moderate content relevance")
+        
+        if audience_score >= 90:
+            reasons.append("Exceptional listener engagement")
+        elif audience_score >= 75:
+            reasons.append("Strong audience base")
+        elif audience_score >= 60:
+            reasons.append("Good listener base")
+        else:
+            reasons.append("Moderate audience reach")
+        
+        if recency_score >= 90:
+            reasons.append("Very actively publishing")
+        elif recency_score >= 75:
+            reasons.append("Recently active")
+        elif recency_score >= 60:
+            reasons.append("Moderately active")
+        else:
+            reasons.append("Less recent activity")
+        
+        if podcast.get('categories'):
+            reasons.append(f"Topics: {podcast['categories']}")
+        
+        return " | ".join(reasons)
+    except Exception as e:
+        logger.error(f"Error generating score reason: {str(e)}")
+        return "Error generating reason"
 
 def generate_mismatch_explanation(podcast: Dict, relevance_score: float, audience_score: float, recency_score: float) -> str:
-    """
-    Generate explanation for potential mismatches.
-    
-    Args:
-        podcast (Dict): Podcast data
-        relevance_score (float): Content relevance score
-        audience_score (float): Audience score
-        recency_score (float): Recency score
+    """Generate mismatch explanation with error handling."""
+    try:
+        mismatches = []
         
-    Returns:
-        str: Explanation of potential mismatches
-    """
-    mismatches = []
-    
-    if relevance_score < 60:
-        mismatches.append("Content alignment could be stronger")
-    
-    if audience_score < 60:
-        mismatches.append("Limited audience reach")
+        if relevance_score < 60:
+            mismatches.append("Content alignment could be stronger")
         
-    if recency_score < 60:
-        mismatches.append("Publishing frequency could be more consistent")
-    
-    if not podcast.get('categories'):
-        mismatches.append("Podcast focus unclear")
+        if audience_score < 60:
+            mismatches.append("Limited audience reach")
+            
+        if recency_score < 60:
+            mismatches.append("Publishing frequency could be more consistent")
+        
+        if not podcast.get('categories'):
+            mismatches.append("Podcast focus unclear")
 
-    if not podcast.get('contact_email') and not podcast.get('contact_name'):
-        mismatches.append("Contact information unavailable")
-        
-    return " | ".join(mismatches) if mismatches else "No significant concerns identified"
+        if not podcast.get('contact_email') and not podcast.get('contact_name'):
+            mismatches.append("Contact information unavailable")
+            
+        return " | ".join(mismatches) if mismatches else "No significant concerns identified"
+    except Exception as e:
+        logger.error(f"Error generating mismatch explanation: {str(e)}")
+        return "Error generating explanation"
 
 def extract_text_content(file_path: str, file_type: str) -> Optional[str]:
-    """
-    Extract text content from various file types.
-    
-    Args:
-        file_path (str): Path to the file
-        file_type (str): Type of file ('txt', 'docx', 'html')
-        
-    Returns:
-        Optional[str]: Extracted text content or None if extraction fails
-    """
+    """Extract text content safely with error handling and timeouts."""
     try:
         if file_type == 'txt':
-            with open(file_path, 'r', encoding='utf-8') as f:
-                return f.read()
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    return f.read()
+            except UnicodeDecodeError:
+                with open(file_path, 'r', encoding='latin-1') as f:
+                    return f.read()
         elif file_type == 'docx':
-            from docx import Document
-            doc = Document(file_path)
-            return '\n'.join([paragraph.text for paragraph in doc.paragraphs])
+            try:
+                doc = Document(file_path)
+                return '\n'.join([paragraph.text for paragraph in doc.paragraphs])
+            except Exception as e:
+                logger.error(f"Error processing docx: {str(e)}")
+                return None
         elif file_type == 'html':
-            from bs4 import BeautifulSoup
-            with open(file_path, 'r', encoding='utf-8') as f:
-                soup = BeautifulSoup(f.read(), 'html.parser')
-                # Remove script and style elements
-                for script in soup(["script", "style"]):
-                    script.decompose()
-                return soup.get_text()
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    soup = BeautifulSoup(f.read(), 'html.parser')
+                    # Remove script and style elements
+                    for script in soup(["script", "style"]):
+                        script.decompose()
+                    return soup.get_text(separator=' ', strip=True)
+            except Exception as e:
+                logger.error(f"Error processing html: {str(e)}")
+                return None
         else:
             logger.warning(f"Unsupported file type: {file_type}")
             return None
@@ -258,30 +209,17 @@ def extract_text_content(file_path: str, file_type: str) -> Optional[str]:
         return None
 
 def validate_file_type(filename: str) -> bool:
-    """
-    Validate if file type is supported.
-    
-    Args:
-        filename (str): Name of the file
-        
-    Returns:
-        bool: True if file type is supported, False otherwise
-    """
+    """Validate if file type is supported."""
     allowed_extensions = {'txt', 'docx', 'html', 'csv'}
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+    try:
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+    except Exception as e:
+        logger.error(f"Error validating file type: {str(e)}")
+        return False
 
 def get_file_stats(file_path: str) -> Dict:
-    """
-    Get basic file statistics.
-    
-    Args:
-        file_path (str): Path to the file
-        
-    Returns:
-        Dict: Dictionary containing file statistics
-    """
+    """Get basic file statistics with error handling."""
     try:
-        import os
         stats = os.stat(file_path)
         return {
             'size': stats.st_size,
@@ -292,7 +230,7 @@ def get_file_stats(file_path: str) -> Dict:
         logger.error(f"Error getting file stats: {str(e)}")
         return {}
 
-# Export all functions for use in other modules
+# Export all functions
 __all__ = [
     'create_embedding',
     'format_date',
