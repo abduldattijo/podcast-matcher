@@ -65,4 +65,4 @@ urllib3==2.2.3
 websockets==13.1
 Werkzeug==3.0.1
 yarl==1.17.2
-flask-cors==5.0.0
+flask-cors==5.0.0 
