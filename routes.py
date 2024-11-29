@@ -7,12 +7,8 @@ from docx import Document
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import logging
-from matching import calculate_relevance_score
-from typing import Generator
-from matching import calculate_guest_fit_score
-
-import itertools
-import gc
+import time
+from typing import Generator, List, Dict
 from utils import (
     create_embedding, 
     generate_score_reason, 
@@ -22,16 +18,20 @@ from utils import (
 )
 from database import supabase
 from bs4 import BeautifulSoup
+from matching import calculate_relevance_score
+from flask import Response
+
+from matching import calculate_guest_fit_score
 
 logger = logging.getLogger(__name__)
 
-def process_file_in_chunks(file, chunk_size: int = 1024) -> Generator[str, None, None]:
+def process_file_in_chunks(file, chunk_size: int = 4096) -> Generator[str, None, None]:
     """Process large files in chunks."""
     for chunk in iter(lambda: file.read(chunk_size), b''):
         yield chunk.decode('utf-8')
 
-def batch_db_operations(items, batch_size: int = 50):
-    """Process database operations in batches."""
+def batch_db_operations(items: List, batch_size: int = 5) -> Generator[List, None, None]:
+    """Process database operations in small batches."""
     for i in range(0, len(items), batch_size):
         yield items[i:i + batch_size]
 
@@ -63,34 +63,46 @@ def extract_text_from_html(html_content):
         logger.error(f"Error extracting text from HTML: {str(e)}")
         return None
 
-def cleanup_memory():
-    """Force garbage collection."""
-    gc.collect()
+def safe_cleanup(obj=None):
+    """Safe memory cleanup without gc."""
+    if obj:
+        try:
+            del obj
+        except:
+            pass
 
-def process_single_podcast(podcast):
-    """Process a single podcast with memory cleanup."""
+def process_single_podcast(podcast: Dict):
+    """Process single podcast with safe memory handling."""
     try:
         from main import process_podcast
-        process_podcast(podcast, supabase)
+        return process_podcast(podcast, supabase)
     except Exception as e:
         logger.error(f"Single podcast error: {str(e)}")
-    finally:
-        cleanup_memory()
+        return None
 
-def process_podcast_batch(podcasts):
-    """Process a batch of podcasts with memory cleanup."""
-    for podcast in podcasts:
-        try:
-            response = supabase.table('podcasts').insert(podcast).execute()
-            if response.data:
-                process_single_podcast(response.data[0])
-        except Exception as e:
-            logger.error(f"Podcast processing error: {str(e)}")
-        finally:
-            cleanup_memory()
+def process_podcast_batch(podcasts: List[Dict], batch_size: int = 5):
+    """Process podcasts in small batches with safety checks."""
+    results = []
+    for i in range(0, len(podcasts), batch_size):
+        batch = podcasts[i:i + batch_size]
+        for podcast in batch:
+            try:
+                response = supabase.table('podcasts').insert(podcast).execute()
+                if response.data:
+                    result = process_single_podcast(response.data[0])
+                    if result:
+                        results.append(result)
+            except Exception as e:
+                logger.error(f"Podcast processing error: {str(e)}")
+            finally:
+                safe_cleanup(response)
 
-def process_podcast_scores(client_embeddings, podcast_batch, batch_size):
-    """Process podcast scoring with memory management."""
+        time.sleep(1)  # Allow system to stabilize
+    
+    return results
+
+def process_podcast_scores(client_embeddings: List, podcast_batch: List[Dict], batch_size: int):
+    """Process podcast scoring with safe memory management."""
     scores = []
     for podcast in podcast_batch:
         try:
@@ -101,19 +113,18 @@ def process_podcast_scores(client_embeddings, podcast_batch, batch_size):
             if not embedding:
                 continue
 
-            # Calculate scores with memory cleanup between operations
+            # Calculate scores
             relevance_score = calculate_relevance_score(
                 client_embeddings, 
                 embedding, 
                 podcast.get('categories', '')
             )
-            cleanup_memory()
             
             audience_score = float(podcast['listen_score']) if podcast.get('listen_score') else 0.0
             recency_score = calculate_recency_score(podcast.get('last_updated'))
             host_interest_score = 100.0 * (1 - podcast['global_rank'])
 
-            # Get episodes in batches with memory cleanup
+            # Get episodes in batches
             episode_embeddings = []
             offset = 0
             while True:
@@ -131,7 +142,7 @@ def process_podcast_scores(client_embeddings, podcast_batch, batch_size):
                         episode_embeddings.append(embedding)
                 
                 offset += batch_size
-                cleanup_memory()
+                safe_cleanup(episodes)
                 
                 if len(episodes.data) < batch_size:
                     break
@@ -141,7 +152,6 @@ def process_podcast_scores(client_embeddings, podcast_batch, batch_size):
                 client_embeddings,
                 episode_embeddings
             )
-            cleanup_memory()
 
             # Calculate aggregate score
             weights = {
@@ -172,7 +182,7 @@ def process_podcast_scores(client_embeddings, podcast_batch, batch_size):
                 "potential_mismatch": generate_mismatch_explanation(podcast, relevance_score, audience_score, recency_score)
             })
 
-            cleanup_memory()
+            safe_cleanup(episode_embeddings)
 
         except Exception as e:
             logger.error(f"Error processing podcast {podcast.get('id')}: {str(e)}")
@@ -183,37 +193,32 @@ def process_podcast_scores(client_embeddings, podcast_batch, batch_size):
 def init_routes(app):
     @app.route('/')
     def index():
-        cleanup_memory()
         return redirect(url_for('upload_combined'))
 
     @app.route('/upload_combined')
     def upload_combined():
         try:
-            cleanup_memory()
             response = supabase.table('clients').select('*').execute()
             clients = response.data
+            safe_cleanup(response)
             return render_template('upload.html', clients=clients)
         except Exception as e:
             logger.error(f"Error fetching clients: {str(e)}")
             flash("Error loading clients")
-            cleanup_memory()
             return render_template('upload.html', clients=[])
 
     @app.route('/get_clients')
     def get_clients():
         try:
-            cleanup_memory()
             response = supabase.table('clients').select('*').execute()
             return jsonify(response.data)
         except Exception as e:
             logger.error(f"Error fetching clients: {str(e)}")
-            cleanup_memory()
             return jsonify({"error": str(e)}), 500
 
     @app.route('/upload_client', methods=['POST'])
     def upload_client():
         try:
-            cleanup_memory()
             client_id = request.form.get("client_id")
             chunk_size = app.config['UPLOAD_CHUNK_SIZE']
 
@@ -225,6 +230,7 @@ def init_routes(app):
                     }).execute()
                     client_id = response.data[0]['id']
                     logger.info(f"Added new client {client_name}")
+                    safe_cleanup(response)
                 else:
                     flash("Client name missing.")
                     return redirect(url_for('upload_combined'))
@@ -239,14 +245,13 @@ def init_routes(app):
                     filename = secure_filename(file.filename)
                     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                     
-                    # Stream file writing
                     with open(filepath, 'wb') as f:
                         while True:
                             chunk = file.stream.read(chunk_size)
                             if not chunk:
                                 break
                             f.write(chunk)
-                            cleanup_memory()
+                            time.sleep(0.1)  # Prevent timeout
 
                     try:
                         transcription = extract_text_content(filepath, filename.split('.')[-1].lower())
@@ -256,15 +261,15 @@ def init_routes(app):
                         logger.error(f"Error processing {filename}: {str(e)}")
                         transcription = f"Error processing file: {str(e)}"
 
-                    # Process embedding in chunks
-                    if len(transcription) > 10000:
-                        chunks = [transcription[i:i+10000] for i in range(0, len(transcription), 10000)]
+                    # Process embedding in smaller chunks
+                    if len(transcription) > 8000:
+                        chunks = [transcription[i:i+8000] for i in range(0, len(transcription), 8000)]
                         embeddings = []
                         for chunk in chunks:
                             chunk_embedding = create_embedding(chunk)
                             if chunk_embedding is not None:
                                 embeddings.append(chunk_embedding)
-                            cleanup_memory()
+                            time.sleep(0.1)  # Prevent timeout
                         if embeddings:
                             embedding = np.mean(embeddings, axis=0)
                         else:
@@ -286,21 +291,19 @@ def init_routes(app):
                     except Exception as e:
                         logger.error(f"Error removing temporary file {filepath}: {str(e)}")
 
-                    cleanup_memory()
+                    time.sleep(0.1)  # Prevent timeout
 
             flash("Client data uploaded successfully.")
             return redirect(url_for('upload_combined'))
 
         except Exception as e:
             logger.error(f"Error in upload_client: {str(e)}")
-            cleanup_memory()
             flash(f"Error uploading client data: {str(e)}")
             return redirect(url_for('upload_combined'))
 
     @app.route('/upload_podcast', methods=['POST'])
     def upload_podcast():
         try:
-            cleanup_memory()
             client_id = request.form.get("client_id")
             if not client_id:
                 return jsonify({"error": "Client ID required"}), 400
@@ -314,19 +317,19 @@ def init_routes(app):
 
             # Stream process the CSV
             stream = StringIO()
-            chunk_size = app.config['UPLOAD_CHUNK_SIZE']
+            chunk_size = 4096  # 4KB chunks
             while True:
                 chunk = file.read(chunk_size).decode('utf-8')
                 if not chunk:
                     break
                 stream.write(chunk)
-                cleanup_memory()
+                time.sleep(0.1)  # Prevent timeout
 
             stream.seek(0)
             reader = csv.DictReader(stream)
             podcasts = []
+            batch_size = 5  # Process 5 podcasts at a time
 
-            # Collect podcast data
             for row in reader:
                 try:
                     podcasts.append({
@@ -338,36 +341,35 @@ def init_routes(app):
                         "rss_feed": row['RSS Feed'][:255],
                         "status": "New"
                     })
+
+                    if len(podcasts) >= batch_size:
+                        process_podcast_batch(podcasts, batch_size)
+                        podcasts = []
+                        time.sleep(1)  # Pause between batches
+
                 except (ValueError, KeyError) as e:
                     logger.error(f"Error parsing row: {str(e)}")
                     continue
 
-                if len(podcasts) >= 10:  # Process in small batches
-                    process_podcast_batch(podcasts)
-                    podcasts = []
-                    cleanup_memory()
-
             # Process remaining podcasts
             if podcasts:
-                process_podcast_batch(podcasts)
+                process_podcast_batch(podcasts, batch_size)
 
-            cleanup_memory()
+            safe_cleanup(stream)
             return jsonify({"success": True})
 
         except Exception as e:
             logger.error(f"Upload error: {str(e)}")
-            cleanup_memory()
             return jsonify({"error": str(e)}), 500
 
     @app.route('/match_podcasts')
     def match_podcasts():
         try:
-            cleanup_memory()
             client_id = request.args.get("client_id")
             min_score = float(request.args.get("min_score", 20))
             max_score = float(request.args.get("max_score", 100))
             include_blank = request.args.get("include_blank", "false").lower() == "true"
-            BATCH_SIZE = app.config['BATCH_SIZE']
+            batch_size = 5  # Smaller batch size
 
             if not client_id:
                 return jsonify({"error": "Client ID is missing."}), 400
@@ -379,7 +381,7 @@ def init_routes(app):
                 batch = supabase.table('client_data')\
                     .select('embedding')\
                     .eq('client_id', client_id)\
-                    .range(offset, offset + BATCH_SIZE - 1)\
+                    .range(offset, offset + batch_size - 1)\
                     .execute()
                 
                 if not batch.data:
@@ -389,10 +391,11 @@ def init_routes(app):
                     if embedding := parse_embedding_string(data.get('embedding')):
                         client_embeddings.append(embedding)
                 
-                offset += BATCH_SIZE
-                cleanup_memory()
+                offset += batch_size
+                safe_cleanup(batch)
+                time.sleep(0.1)  # Prevent timeout
                 
-                if len(batch.data) < BATCH_SIZE:
+                if len(batch.data) < batch_size:
                     break
 
             if not client_embeddings:
@@ -405,13 +408,12 @@ def init_routes(app):
                 batch = supabase.table('podcasts')\
                     .select('*')\
                     .eq('client_id', client_id)\
-                    .range(offset, offset + BATCH_SIZE - 1)\
+                    .range(offset, offset + batch_size - 1)\
                     .execute()
                 
                 if not batch.data:
                     break
 
-                # Filter and validate podcasts
                 for podcast in batch.data:
                     try:
                         if podcast.get('embedding'):
@@ -433,37 +435,37 @@ def init_routes(app):
                         logger.warning(f"Invalid listen score for podcast {podcast.get('id')}: {e}")
                         continue
                 
-                offset += BATCH_SIZE
-                cleanup_memory()
+                offset += batch_size
+                safe_cleanup(batch)
+                time.sleep(0.1)  # Prevent timeout
                 
-                if len(batch.data) < BATCH_SIZE:
+                if len(batch.data) < batch_size:
                     break
 
             if not valid_podcasts:
-               return jsonify({"error": "No valid podcast matches found with the selected filters."}), 400
+                return jsonify({"error": "No valid podcast matches found with the selected filters."}), 400
 
-            # Process matches in batches with memory cleanup
+            # Process matches in batches
             final_scores = []
-            for podcast_batch in batch_db_operations(valid_podcasts, BATCH_SIZE):
+            for podcast_batch in batch_db_operations(valid_podcasts, batch_size):
                 batch_scores = process_podcast_scores(
                     client_embeddings, 
                     podcast_batch,
-                    BATCH_SIZE
+                    batch_size
                 )
                 final_scores.extend(batch_scores)
-                cleanup_memory()
+                time.sleep(0.1)  # Prevent timeout
 
+            safe_cleanup(valid_podcasts)
             return jsonify(sorted(final_scores, key=lambda x: x["aggregate_score"], reverse=True))
 
         except Exception as e:
             logger.error(f"Error in match_podcasts: {str(e)}")
-            cleanup_memory()
             return jsonify({"error": str(e)}), 500
 
     @app.route('/get_podcast_stats')
     def get_podcast_stats():
         try:
-            cleanup_memory()
             client_id = request.args.get("client_id")
             if not client_id:
                 return jsonify({"error": "Client ID is missing."}), 400
@@ -494,7 +496,7 @@ def init_routes(app):
                 datetime.strptime(p['last_updated'], '%m-%d-%Y') > recent_cutoff
             ])
 
-            cleanup_memory()
+            safe_cleanup(podcasts)
             return jsonify({
                 "total_podcasts": total_podcasts,
                 "avg_listen_score": round(avg_listen_score, 1),
@@ -504,55 +506,50 @@ def init_routes(app):
 
         except Exception as e:
             logger.error(f"Error getting podcast stats: {str(e)}")
-            cleanup_memory()
             return jsonify({"error": str(e)}), 500
 
     @app.route('/export_matches', methods=['GET'])
     def export_matches():
         try:
-            cleanup_memory()
             client_id = request.args.get("client_id")
             if not client_id:
                 return jsonify({"error": "Client ID is required"}), 400
 
-            # Get client name
             client = supabase.table('clients')\
                 .select('name')\
                 .eq('id', client_id)\
                 .execute()
             
             client_name = client.data[0]['name'] if client.data else "Unknown Client"
+            safe_cleanup(client)
 
-            # Get matched podcasts in batches
-            BATCH_SIZE = app.config['BATCH_SIZE']
             matches = []
             offset = 0
+            batch_size = 5
             
             while True:
                 batch = supabase.table('podcasts')\
                     .select('*')\
                     .eq('client_id', client_id)\
-                    .range(offset, offset + BATCH_SIZE - 1)\
+                    .range(offset, offset + batch_size - 1)\
                     .execute()
                 
                 if not batch.data:
                     break
                     
                 matches.extend(batch.data)
-                offset += BATCH_SIZE
-                cleanup_memory()
+                offset += batch_size
+                safe_cleanup(batch)
+                time.sleep(0.1)  # Prevent timeout
                 
-                if len(batch.data) < BATCH_SIZE:
+                if len(batch.data) < batch_size:
                     break
 
             if not matches:
                 return jsonify({"error": "No matches found"}), 404
 
-            # Create CSV content
             output = StringIO()
             writer = csv.writer(output)
-            
-            # Write headers
             writer.writerow([
                 'Podcast Name',
                 'Listen Score',
@@ -565,8 +562,7 @@ def init_routes(app):
                 'Last Updated'
             ])
 
-            # Write data in batches
-            for batch in batch_db_operations(matches, BATCH_SIZE):
+            for batch in batch_db_operations(matches, batch_size):
                 for match in batch:
                     writer.writerow([
                         match.get('title', ''),
@@ -579,10 +575,9 @@ def init_routes(app):
                         match.get('rss_feed', ''),
                         match.get('last_updated', '')
                     ])
-                cleanup_memory()
+                time.sleep(0.1)  # Prevent timeout
 
-            # Create response
-            from flask import Response
+            safe_cleanup(matches)
             output.seek(0)
             response = Response(
                 output.getvalue(),
@@ -592,12 +587,11 @@ def init_routes(app):
                 }
             )
             
-            cleanup_memory()
+            safe_cleanup(output)
             return response
 
         except Exception as e:
             logger.error(f"Error exporting matches: {str(e)}")
-            cleanup_memory()
             return jsonify({"error": str(e)}), 500
 
     return app
