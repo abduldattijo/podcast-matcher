@@ -1,0 +1,1023 @@
+2025-02-08 15:15:15,592 - __main__ - ERROR - OpenAI API key not found in environment variables
+2025-02-08 15:15:15,592 - __main__ - ERROR - Error creating Flask app: OpenAI API key not configured
+2025-02-08 15:15:15,592 - __main__ - ERROR - Error initializing application: OpenAI API key not configured
+2025-02-08 15:15:15,592 - __main__ - CRITICAL - Failed to initialize application: OpenAI API key not configured
+2025-02-08 15:19:16,016 - __main__ - INFO - Memory usage: 466.27 MB
+2025-02-08 15:19:17,532 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 15:19:17,535 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 15:19:17,536 - __main__ - INFO - Memory usage: 467.39 MB
+2025-02-08 15:19:17,538 - __main__ - INFO - Application initialized successfully
+2025-02-08 15:19:17,541 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:10000
+ * Running on http://10.0.2.21:10000
+2025-02-08 15:19:17,541 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-02-08 15:20:40,902 - __main__ - INFO - Incoming request: GET /
+2025-02-08 15:20:40,903 - __main__ - INFO - Memory usage: 467.52 MB
+2025-02-08 15:20:40,904 - __main__ - INFO - Response status: 302 FOUND
+2025-02-08 15:20:40,986 - __main__ - INFO - Memory usage: 467.64 MB
+2025-02-08 15:20:40,986 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:20:40] "[32mGET / HTTP/1.1[0m" 302 -
+2025-02-08 15:20:41,541 - __main__ - INFO - Incoming request: GET /upload_combined
+2025-02-08 15:20:41,542 - __main__ - INFO - Memory usage: 467.64 MB
+2025-02-08 15:20:42,373 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 15:20:42,382 - __main__ - INFO - Response status: 200 OK
+2025-02-08 15:20:42,450 - __main__ - INFO - Memory usage: 468.02 MB
+2025-02-08 15:20:42,451 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:20:42] "GET /upload_combined HTTP/1.1" 200 -
+2025-02-08 15:20:43,085 - __main__ - INFO - Incoming request: GET /static/js/upload.js
+2025-02-08 15:20:43,085 - __main__ - INFO - Memory usage: 468.14 MB
+2025-02-08 15:20:43,086 - __main__ - INFO - Response status: 200 OK
+2025-02-08 15:20:43,087 - __main__ - INFO - Incoming request: GET /static/js/matching.js
+2025-02-08 15:20:43,170 - __main__ - INFO - Memory usage: 468.14 MB
+2025-02-08 15:20:43,171 - __main__ - INFO - Response status: 200 OK
+2025-02-08 15:20:43,233 - __main__ - INFO - Memory usage: 468.14 MB
+2025-02-08 15:20:43,233 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:20:43] "GET /static/js/upload.js HTTP/1.1" 200 -
+2025-02-08 15:20:43,234 - __main__ - INFO - Memory usage: 468.14 MB
+2025-02-08 15:20:43,235 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:20:43] "GET /static/js/matching.js HTTP/1.1" 200 -
+2025-02-08 15:20:46,419 - __main__ - INFO - Incoming request: GET /favicon.ico
+2025-02-08 15:20:46,420 - __main__ - INFO - Memory usage: 468.14 MB
+2025-02-08 15:20:46,495 - __main__ - INFO - Memory usage: 468.14 MB
+2025-02-08 15:20:46,496 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:20:46] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-02-08 15:20:46,510 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 841, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 450, in raise_routing_exception
+    raise request.routing_exception  # type: ignore
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/ctx.py", line 353, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/routing/map.py", line 624, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 323, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1478, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1458, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 752, in handle_user_exception
+    return self.handle_http_exception(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 727, in handle_http_exception
+    return self.ensure_sync(handler)(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/podcast-matcher/app.py", line 155, in not_found_error
+    return render_template('error.html', error="404 - Page Not Found"), 404
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 151, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1084, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1013, in get_template
+    return self._load_template(name, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 972, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: error.html
+2025-02-08 15:21:53,414 - __main__ - INFO - Incoming request: GET /get_podcast_stats
+2025-02-08 15:21:53,415 - __main__ - INFO - Memory usage: 468.64 MB
+2025-02-08 15:21:54,328 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/podcasts?select=listen_score%2Cglobal_rank%2Clast_updated&client_id=eq.10 "HTTP/2 200 OK"
+2025-02-08 15:21:54,341 - __main__ - INFO - Response status: 200 OK
+2025-02-08 15:21:54,407 - __main__ - INFO - Memory usage: 468.77 MB
+2025-02-08 15:21:54,407 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:21:54] "GET /get_podcast_stats?client_id=10 HTTP/1.1" 200 -
+2025-02-08 15:22:59,662 - __main__ - INFO - Incoming request: GET /upload_combined
+2025-02-08 15:22:59,662 - __main__ - INFO - Memory usage: 468.77 MB
+2025-02-08 15:23:00,517 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 15:23:00,520 - __main__ - INFO - Response status: 200 OK
+2025-02-08 15:23:00,586 - __main__ - INFO - Memory usage: 468.89 MB
+2025-02-08 15:23:00,587 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:23:00] "GET /upload_combined HTTP/1.1" 200 -
+2025-02-08 15:23:01,254 - __main__ - INFO - Incoming request: GET /static/js/matching.js
+2025-02-08 15:23:01,254 - __main__ - INFO - Memory usage: 468.89 MB
+2025-02-08 15:23:01,255 - __main__ - INFO - Response status: 200 OK
+2025-02-08 15:23:01,344 - __main__ - INFO - Memory usage: 468.89 MB
+2025-02-08 15:23:01,344 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:23:01] "GET /static/js/matching.js HTTP/1.1" 200 -
+2025-02-08 15:23:01,380 - __main__ - INFO - Incoming request: GET /static/js/upload.js
+2025-02-08 15:23:01,380 - __main__ - INFO - Memory usage: 468.89 MB
+2025-02-08 15:23:01,381 - __main__ - INFO - Response status: 200 OK
+2025-02-08 15:23:01,445 - __main__ - INFO - Memory usage: 468.89 MB
+2025-02-08 15:23:01,445 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:23:01] "GET /static/js/upload.js HTTP/1.1" 200 -
+2025-02-08 15:23:02,478 - __main__ - INFO - Incoming request: GET /favicon.ico
+2025-02-08 15:23:02,479 - __main__ - INFO - Memory usage: 468.89 MB
+2025-02-08 15:23:02,551 - __main__ - INFO - Memory usage: 468.89 MB
+2025-02-08 15:23:02,551 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:23:02] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-02-08 15:23:02,559 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 841, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 450, in raise_routing_exception
+    raise request.routing_exception  # type: ignore
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/ctx.py", line 353, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/routing/map.py", line 624, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 323, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1478, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1458, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 752, in handle_user_exception
+    return self.handle_http_exception(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 727, in handle_http_exception
+    return self.ensure_sync(handler)(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/podcast-matcher/app.py", line 155, in not_found_error
+    return render_template('error.html', error="404 - Page Not Found"), 404
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 151, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1084, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1013, in get_template
+    return self._load_template(name, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 972, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: error.html
+2025-02-08 15:23:36,314 - __main__ - INFO - Incoming request: GET /get_podcast_stats
+2025-02-08 15:23:36,314 - __main__ - INFO - Memory usage: 468.89 MB
+2025-02-08 15:23:37,148 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/podcasts?select=listen_score%2Cglobal_rank%2Clast_updated&client_id=eq.12 "HTTP/2 200 OK"
+2025-02-08 15:23:37,153 - __main__ - INFO - Response status: 200 OK
+2025-02-08 15:23:37,219 - __main__ - INFO - Memory usage: 468.89 MB
+2025-02-08 15:23:37,220 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 15:23:37] "GET /get_podcast_stats?client_id=12 HTTP/1.1" 200 -
+2025-02-08 22:27:29,371 - __main__ - INFO - Memory usage: 466.28 MB
+2025-02-08 22:27:30,272 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 22:27:30,275 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 22:27:30,276 - __main__ - INFO - Memory usage: 467.40 MB
+2025-02-08 22:27:30,279 - __main__ - INFO - Application initialized successfully
+2025-02-08 22:27:30,282 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:10000
+ * Running on http://10.0.2.160:10000
+2025-02-08 22:27:30,282 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-02-08 22:28:54,734 - __main__ - INFO - Memory usage: 467.65 MB
+2025-02-08 22:28:55,542 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 22:28:55,544 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 22:28:55,544 - __main__ - INFO - Memory usage: 467.78 MB
+2025-02-08 22:28:55,547 - __main__ - INFO - Application initialized successfully
+2025-02-08 22:30:51,782 - __main__ - INFO - Memory usage: 467.90 MB
+2025-02-08 22:30:52,672 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 22:30:52,673 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 22:30:52,674 - __main__ - INFO - Memory usage: 468.03 MB
+2025-02-08 22:30:52,676 - __main__ - INFO - Application initialized successfully
+2025-02-08 22:32:58,179 - __main__ - INFO - Memory usage: 471.03 MB
+2025-02-08 22:32:58,565 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 22:32:58,566 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 22:32:58,566 - __main__ - INFO - Memory usage: 471.15 MB
+2025-02-08 22:32:58,568 - __main__ - INFO - Application initialized successfully
+2025-02-08 22:37:49,048 - __main__ - INFO - Memory usage: 481.38 MB
+2025-02-08 22:37:49,988 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 22:37:49,989 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 22:37:49,990 - __main__ - INFO - Memory usage: 481.38 MB
+2025-02-08 22:37:49,992 - __main__ - INFO - Application initialized successfully
+2025-02-08 22:38:45,749 - __main__ - INFO - Memory usage: 481.38 MB
+2025-02-08 22:38:46,576 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 22:38:46,576 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 22:38:46,577 - __main__ - INFO - Memory usage: 481.50 MB
+2025-02-08 22:38:46,581 - __main__ - INFO - Application initialized successfully
+2025-02-08 22:42:16,239 - __main__ - INFO - Memory usage: 481.75 MB
+2025-02-08 22:42:17,132 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 22:42:17,134 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 22:42:17,135 - __main__ - INFO - Memory usage: 481.75 MB
+2025-02-08 22:42:17,137 - __main__ - INFO - Application initialized successfully
+2025-02-08 22:43:16,020 - __main__ - INFO - Memory usage: 479.88 MB
+2025-02-08 22:43:16,820 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 22:43:16,824 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 22:43:16,825 - __main__ - INFO - Memory usage: 481.00 MB
+2025-02-08 22:43:16,829 - __main__ - INFO - Application initialized successfully
+2025-02-08 22:43:16,831 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:10000
+ * Running on http://10.0.2.160:10000
+2025-02-08 22:43:16,831 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-02-08 22:45:12,639 - __main__ - INFO - Incoming request: GET /
+2025-02-08 22:45:12,639 - __main__ - INFO - Memory usage: 481.62 MB
+2025-02-08 22:45:12,640 - __main__ - INFO - Response status: 302 FOUND
+2025-02-08 22:45:12,711 - __main__ - INFO - Memory usage: 481.75 MB
+2025-02-08 22:45:12,712 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 22:45:12] "[32mGET / HTTP/1.1[0m" 302 -
+2025-02-08 22:45:13,117 - __main__ - INFO - Incoming request: GET /upload_combined
+2025-02-08 22:45:13,117 - __main__ - INFO - Memory usage: 481.75 MB
+2025-02-08 22:45:14,011 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 22:45:14,020 - __main__ - INFO - Response status: 200 OK
+2025-02-08 22:45:14,087 - __main__ - INFO - Memory usage: 482.12 MB
+2025-02-08 22:45:14,088 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 22:45:14] "GET /upload_combined HTTP/1.1" 200 -
+2025-02-08 22:45:14,671 - __main__ - INFO - Incoming request: GET /static/js/matching.js
+2025-02-08 22:45:14,671 - __main__ - INFO - Incoming request: GET /static/js/upload.js
+2025-02-08 22:45:14,672 - __main__ - INFO - Memory usage: 482.12 MB
+2025-02-08 22:45:14,672 - __main__ - INFO - Response status: 200 OK
+2025-02-08 22:45:14,741 - __main__ - INFO - Memory usage: 482.12 MB
+2025-02-08 22:45:14,742 - __main__ - INFO - Response status: 200 OK
+2025-02-08 22:45:14,742 - __main__ - INFO - Memory usage: 482.12 MB
+2025-02-08 22:45:14,804 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 22:45:14] "GET /static/js/upload.js HTTP/1.1" 200 -
+2025-02-08 22:45:14,804 - __main__ - INFO - Memory usage: 482.12 MB
+2025-02-08 22:45:14,805 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 22:45:14] "GET /static/js/matching.js HTTP/1.1" 200 -
+2025-02-08 22:45:15,627 - __main__ - INFO - Incoming request: GET /favicon.ico
+2025-02-08 22:45:15,627 - __main__ - INFO - Memory usage: 482.12 MB
+2025-02-08 22:45:15,696 - __main__ - INFO - Memory usage: 482.12 MB
+2025-02-08 22:45:15,697 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 22:45:15] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-02-08 22:45:15,717 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 841, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 450, in raise_routing_exception
+    raise request.routing_exception  # type: ignore
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/ctx.py", line 353, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/routing/map.py", line 624, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 323, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1478, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1458, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 752, in handle_user_exception
+    return self.handle_http_exception(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 727, in handle_http_exception
+    return self.ensure_sync(handler)(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/podcast-matcher/app.py", line 157, in not_found_error
+    return render_template('error.html', error="404 - Page Not Found"), 404
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 151, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1084, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1013, in get_template
+    return self._load_template(name, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 972, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: error.html
+2025-02-08 23:00:46,731 - __main__ - INFO - Memory usage: 483.75 MB
+2025-02-08 23:00:47,715 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:00:47,717 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:00:47,718 - __main__ - INFO - Memory usage: 483.75 MB
+2025-02-08 23:00:47,720 - __main__ - INFO - Application initialized successfully
+2025-02-08 23:04:29,617 - __main__ - INFO - Memory usage: 474.52 MB
+2025-02-08 23:04:30,483 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:04:30,487 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:04:30,487 - __main__ - INFO - Memory usage: 475.52 MB
+2025-02-08 23:04:30,489 - __main__ - INFO - Application initialized successfully
+2025-02-08 23:04:30,492 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:10000
+ * Running on http://10.0.2.160:10000
+2025-02-08 23:04:30,492 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-02-08 23:05:31,752 - __main__ - INFO - Incoming request: GET /
+2025-02-08 23:05:31,753 - __main__ - INFO - Memory usage: 475.64 MB
+2025-02-08 23:05:31,754 - __main__ - INFO - Response status: 302 FOUND
+2025-02-08 23:05:31,859 - __main__ - INFO - Memory usage: 475.89 MB
+2025-02-08 23:05:31,860 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 23:05:31] "[32mGET / HTTP/1.1[0m" 302 -
+2025-02-08 23:05:32,292 - __main__ - INFO - Incoming request: GET /upload_combined
+2025-02-08 23:05:32,292 - __main__ - INFO - Memory usage: 476.00 MB
+2025-02-08 23:05:33,120 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:05:33,130 - __main__ - INFO - Response status: 200 OK
+2025-02-08 23:05:33,238 - __main__ - INFO - Memory usage: 476.37 MB
+2025-02-08 23:05:33,238 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 23:05:33] "GET /upload_combined HTTP/1.1" 200 -
+2025-02-08 23:05:33,923 - __main__ - INFO - Incoming request: GET /static/js/upload.js
+2025-02-08 23:05:33,923 - __main__ - INFO - Memory usage: 476.37 MB
+2025-02-08 23:05:33,924 - __main__ - INFO - Response status: 200 OK
+2025-02-08 23:05:34,020 - __main__ - INFO - Memory usage: 476.37 MB
+2025-02-08 23:05:34,021 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 23:05:34] "GET /static/js/upload.js HTTP/1.1" 200 -
+2025-02-08 23:05:34,091 - __main__ - INFO - Incoming request: GET /static/js/matching.js
+2025-02-08 23:05:34,091 - __main__ - INFO - Memory usage: 476.37 MB
+2025-02-08 23:05:34,092 - __main__ - INFO - Response status: 200 OK
+2025-02-08 23:05:34,174 - __main__ - INFO - Memory usage: 476.37 MB
+2025-02-08 23:05:34,175 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 23:05:34] "GET /static/js/matching.js HTTP/1.1" 200 -
+2025-02-08 23:05:34,771 - __main__ - INFO - Incoming request: GET /favicon.ico
+2025-02-08 23:05:34,771 - __main__ - INFO - Memory usage: 476.37 MB
+2025-02-08 23:05:34,847 - __main__ - INFO - Memory usage: 476.37 MB
+2025-02-08 23:05:34,849 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 23:05:34] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-02-08 23:05:34,858 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 841, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 450, in raise_routing_exception
+    raise request.routing_exception  # type: ignore
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/ctx.py", line 353, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/routing/map.py", line 624, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 323, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1478, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1458, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 752, in handle_user_exception
+    return self.handle_http_exception(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 727, in handle_http_exception
+    return self.ensure_sync(handler)(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/podcast-matcher/app.py", line 157, in not_found_error
+    return render_template('error.html', error="404 - Page Not Found"), 404
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 151, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1084, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1013, in get_template
+    return self._load_template(name, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 972, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: error.html
+2025-02-08 23:06:52,526 - __main__ - INFO - Incoming request: GET /upload_combined
+2025-02-08 23:06:52,526 - __main__ - INFO - Memory usage: 476.87 MB
+2025-02-08 23:06:53,426 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:06:53,430 - __main__ - INFO - Response status: 200 OK
+2025-02-08 23:06:53,510 - __main__ - INFO - Memory usage: 477.00 MB
+2025-02-08 23:06:53,510 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 23:06:53] "GET /upload_combined HTTP/1.1" 200 -
+2025-02-08 23:06:54,293 - __main__ - INFO - Incoming request: GET /static/js/matching.js
+2025-02-08 23:06:54,293 - __main__ - INFO - Memory usage: 477.00 MB
+2025-02-08 23:06:54,294 - __main__ - INFO - Response status: 200 OK
+2025-02-08 23:06:54,383 - __main__ - INFO - Incoming request: GET /static/js/upload.js
+2025-02-08 23:06:54,383 - __main__ - INFO - Memory usage: 477.00 MB
+2025-02-08 23:06:54,384 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 23:06:54] "GET /static/js/matching.js HTTP/1.1" 200 -
+2025-02-08 23:06:54,384 - __main__ - INFO - Memory usage: 477.00 MB
+2025-02-08 23:06:54,386 - __main__ - INFO - Response status: 200 OK
+2025-02-08 23:06:54,463 - __main__ - INFO - Memory usage: 477.00 MB
+2025-02-08 23:06:54,464 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 23:06:54] "GET /static/js/upload.js HTTP/1.1" 200 -
+2025-02-08 23:06:55,025 - __main__ - INFO - Incoming request: GET /favicon.ico
+2025-02-08 23:06:55,025 - __main__ - INFO - Memory usage: 477.12 MB
+2025-02-08 23:06:55,106 - __main__ - INFO - Memory usage: 477.12 MB
+2025-02-08 23:06:55,107 - werkzeug - INFO - 127.0.0.1 - - [08/Feb/2025 23:06:55] "[35m[1mGET /favicon.ico HTTP/1.1[0m" 500 -
+2025-02-08 23:06:55,119 - werkzeug - ERROR - Error on request:
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 867, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 841, in dispatch_request
+    self.raise_routing_exception(req)
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 450, in raise_routing_exception
+    raise request.routing_exception  # type: ignore
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/ctx.py", line 353, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/routing/map.py", line 624, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 362, in run_wsgi
+    execute(self.server.app)
+  File "/home/vscode/.local/lib/python3.11/site-packages/werkzeug/serving.py", line 323, in execute
+    application_iter = app(environ, start_response)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1478, in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1458, in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 1455, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 869, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask_cors/extension.py", line 194, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 752, in handle_user_exception
+    return self.handle_http_exception(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/app.py", line 727, in handle_http_exception
+    return self.ensure_sync(handler)(e)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspaces/podcast-matcher/app.py", line 157, in not_found_error
+    }
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 151, in render_template
+    template = app.jinja_env.get_or_select_template(template_name_or_list)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1084, in get_or_select_template
+    return self.get_template(template_name_or_list, parent, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 1013, in get_template
+    return self._load_template(name, globals)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/environment.py", line 972, in _load_template
+    template = self.loader.load(self, name, self.make_globals(globals))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/jinja2/loaders.py", line 126, in load
+    source, filename, uptodate = self.get_source(environment, name)
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 65, in get_source
+    return self._get_source_fast(environment, template)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/vscode/.local/lib/python3.11/site-packages/flask/templating.py", line 99, in _get_source_fast
+    raise TemplateNotFound(template)
+jinja2.exceptions.TemplateNotFound: error.html
+2025-02-08 23:07:27,849 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:07:27,852 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:07:27,853 - __main__ - INFO - Memory usage: 232.55 MB
+2025-02-08 23:07:28,807 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:08:13,200 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:08:13,202 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:08:13,203 - __main__ - INFO - Memory usage: 233.18 MB
+2025-02-08 23:08:14,000 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:08:26,314 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:08:26,317 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:08:26,317 - __main__ - INFO - Memory usage: 233.18 MB
+2025-02-08 23:08:27,164 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:08:30,870 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:08:30,871 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:08:30,872 - __main__ - INFO - Memory usage: 233.30 MB
+2025-02-08 23:08:31,169 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:08:39,531 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:08:39,533 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:08:39,534 - __main__ - INFO - Memory usage: 233.30 MB
+2025-02-08 23:08:40,334 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:08:41,445 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/client_data?select=embedding&client_id=eq.6 "HTTP/2 200 OK"
+2025-02-08 23:08:42,865 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/podcasts?select=%2A&client_id=eq.6 "HTTP/2 200 OK"
+2025-02-08 23:08:46,486 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.14 "HTTP/2 200 OK"
+2025-02-08 23:08:47,069 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.11 "HTTP/2 200 OK"
+2025-02-08 23:08:47,377 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.12 "HTTP/2 200 OK"
+2025-02-08 23:08:48,696 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.13 "HTTP/2 200 OK"
+2025-02-08 23:08:49,253 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.15 "HTTP/2 200 OK"
+2025-02-08 23:08:50,382 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.451 "HTTP/2 200 OK"
+2025-02-08 23:08:51,405 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.453 "HTTP/2 200 OK"
+2025-02-08 23:08:52,491 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.452 "HTTP/2 200 OK"
+2025-02-08 23:08:53,527 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.465 "HTTP/2 200 OK"
+2025-02-08 23:08:54,093 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.372 "HTTP/2 200 OK"
+2025-02-08 23:08:54,393 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.333 "HTTP/2 200 OK"
+2025-02-08 23:08:55,700 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.334 "HTTP/2 200 OK"
+2025-02-08 23:08:56,267 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.338 "HTTP/2 200 OK"
+2025-02-08 23:08:57,358 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.335 "HTTP/2 200 OK"
+2025-02-08 23:08:57,918 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.336 "HTTP/2 200 OK"
+2025-02-08 23:08:59,010 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.337 "HTTP/2 200 OK"
+2025-02-08 23:09:00,109 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.339 "HTTP/2 200 OK"
+2025-02-08 23:09:01,198 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.340 "HTTP/2 200 OK"
+2025-02-08 23:09:01,771 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.341 "HTTP/2 200 OK"
+2025-02-08 23:09:02,081 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.342 "HTTP/2 200 OK"
+2025-02-08 23:09:02,902 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.364 "HTTP/2 200 OK"
+2025-02-08 23:09:03,473 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.365 "HTTP/2 200 OK"
+2025-02-08 23:09:04,030 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.366 "HTTP/2 200 OK"
+2025-02-08 23:09:05,133 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.367 "HTTP/2 200 OK"
+2025-02-08 23:09:06,172 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.368 "HTTP/2 200 OK"
+2025-02-08 23:09:07,015 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.369 "HTTP/2 200 OK"
+2025-02-08 23:09:07,318 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.343 "HTTP/2 200 OK"
+2025-02-08 23:09:08,137 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.370 "HTTP/2 200 OK"
+2025-02-08 23:09:08,703 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.371 "HTTP/2 200 OK"
+2025-02-08 23:09:09,293 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.380 "HTTP/2 200 OK"
+2025-02-08 23:09:09,866 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.373 "HTTP/2 200 OK"
+2025-02-08 23:09:10,190 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.374 "HTTP/2 200 OK"
+2025-02-08 23:09:10,722 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.375 "HTTP/2 200 OK"
+2025-02-08 23:09:11,290 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.376 "HTTP/2 200 OK"
+2025-02-08 23:09:12,373 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.377 "HTTP/2 200 OK"
+2025-02-08 23:09:13,427 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.378 "HTTP/2 200 OK"
+2025-02-08 23:09:13,994 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.379 "HTTP/2 200 OK"
+2025-02-08 23:09:14,565 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.381 "HTTP/2 200 OK"
+2025-02-08 23:09:14,885 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.382 "HTTP/2 200 OK"
+2025-02-08 23:09:15,455 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.383 "HTTP/2 200 OK"
+2025-02-08 23:09:16,022 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.384 "HTTP/2 200 OK"
+2025-02-08 23:09:16,598 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.385 "HTTP/2 200 OK"
+2025-02-08 23:09:17,694 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.386 "HTTP/2 200 OK"
+2025-02-08 23:09:18,245 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.387 "HTTP/2 200 OK"
+2025-02-08 23:09:18,808 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.388 "HTTP/2 200 OK"
+2025-02-08 23:09:19,937 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.389 "HTTP/2 200 OK"
+2025-02-08 23:09:20,501 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.390 "HTTP/2 200 OK"
+2025-02-08 23:09:21,093 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.391 "HTTP/2 200 OK"
+2025-02-08 23:09:22,153 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.392 "HTTP/2 200 OK"
+2025-02-08 23:09:22,734 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.393 "HTTP/2 200 OK"
+2025-02-08 23:09:23,305 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.394 "HTTP/2 200 OK"
+2025-02-08 23:09:23,602 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.395 "HTTP/2 200 OK"
+2025-02-08 23:09:24,677 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.398 "HTTP/2 200 OK"
+2025-02-08 23:09:25,241 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.396 "HTTP/2 200 OK"
+2025-02-08 23:09:25,818 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.397 "HTTP/2 200 OK"
+2025-02-08 23:09:26,877 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.399 "HTTP/2 200 OK"
+2025-02-08 23:09:27,432 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.400 "HTTP/2 200 OK"
+2025-02-08 23:09:28,005 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.401 "HTTP/2 200 OK"
+2025-02-08 23:09:28,323 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.402 "HTTP/2 200 OK"
+2025-02-08 23:09:29,135 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.403 "HTTP/2 200 OK"
+2025-02-08 23:09:29,697 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.420 "HTTP/2 200 OK"
+2025-02-08 23:09:30,253 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.404 "HTTP/2 200 OK"
+2025-02-08 23:09:30,836 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.405 "HTTP/2 200 OK"
+2025-02-08 23:09:31,902 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.406 "HTTP/2 200 OK"
+2025-02-08 23:09:32,465 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.407 "HTTP/2 200 OK"
+2025-02-08 23:09:33,033 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.408 "HTTP/2 200 OK"
+2025-02-08 23:09:33,570 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.409 "HTTP/2 200 OK"
+2025-02-08 23:09:34,136 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.410 "HTTP/2 200 OK"
+2025-02-08 23:09:35,251 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.413 "HTTP/2 200 OK"
+2025-02-08 23:09:35,835 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.415 "HTTP/2 200 OK"
+2025-02-08 23:09:36,407 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.411 "HTTP/2 200 OK"
+2025-02-08 23:09:36,996 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.412 "HTTP/2 200 OK"
+2025-02-08 23:09:37,571 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.414 "HTTP/2 200 OK"
+2025-02-08 23:09:38,127 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.416 "HTTP/2 200 OK"
+2025-02-08 23:09:38,431 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.417 "HTTP/2 200 OK"
+2025-02-08 23:09:38,989 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.418 "HTTP/2 200 OK"
+2025-02-08 23:09:39,570 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.419 "HTTP/2 200 OK"
+2025-02-08 23:09:40,131 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.421 "HTTP/2 200 OK"
+2025-02-08 23:09:40,670 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.422 "HTTP/2 200 OK"
+2025-02-08 23:09:41,235 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.423 "HTTP/2 200 OK"
+2025-02-08 23:09:41,789 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.424 "HTTP/2 200 OK"
+2025-02-08 23:09:42,375 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.425 "HTTP/2 200 OK"
+2025-02-08 23:09:43,185 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.426 "HTTP/2 200 OK"
+2025-02-08 23:09:43,729 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.449 "HTTP/2 200 OK"
+2025-02-08 23:09:44,802 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.427 "HTTP/2 200 OK"
+2025-02-08 23:09:45,392 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.428 "HTTP/2 200 OK"
+2025-02-08 23:09:45,956 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.429 "HTTP/2 200 OK"
+2025-02-08 23:09:46,504 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.430 "HTTP/2 200 OK"
+2025-02-08 23:09:47,088 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.431 "HTTP/2 200 OK"
+2025-02-08 23:09:47,647 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.432 "HTTP/2 200 OK"
+2025-02-08 23:09:48,228 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.433 "HTTP/2 200 OK"
+2025-02-08 23:09:48,798 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.434 "HTTP/2 200 OK"
+2025-02-08 23:09:49,111 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.435 "HTTP/2 200 OK"
+2025-02-08 23:09:49,945 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.436 "HTTP/2 200 OK"
+2025-02-08 23:09:50,521 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.437 "HTTP/2 200 OK"
+2025-02-08 23:09:51,097 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.438 "HTTP/2 200 OK"
+2025-02-08 23:09:51,648 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.439 "HTTP/2 200 OK"
+2025-02-08 23:09:52,209 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.450 "HTTP/2 200 OK"
+2025-02-08 23:09:52,766 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.440 "HTTP/2 200 OK"
+2025-02-08 23:09:53,328 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.441 "HTTP/2 200 OK"
+2025-02-08 23:09:53,885 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.442 "HTTP/2 200 OK"
+2025-02-08 23:09:54,461 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.443 "HTTP/2 200 OK"
+2025-02-08 23:09:55,026 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.444 "HTTP/2 200 OK"
+2025-02-08 23:09:55,027 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:09:55,027 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:09:55,028 - __main__ - INFO - Memory usage: 245.22 MB
+2025-02-08 23:09:55,320 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:09:55,621 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.445 "HTTP/2 200 OK"
+2025-02-08 23:09:56,239 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.446 "HTTP/2 200 OK"
+2025-02-08 23:09:56,805 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.447 "HTTP/2 200 OK"
+2025-02-08 23:09:57,378 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.448 "HTTP/2 200 OK"
+2025-02-08 23:09:57,936 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.454 "HTTP/2 200 OK"
+2025-02-08 23:09:58,511 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.455 "HTTP/2 200 OK"
+2025-02-08 23:09:59,066 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.456 "HTTP/2 200 OK"
+2025-02-08 23:09:59,626 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.457 "HTTP/2 200 OK"
+2025-02-08 23:10:00,183 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.458 "HTTP/2 200 OK"
+2025-02-08 23:10:00,759 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.459 "HTTP/2 200 OK"
+2025-02-08 23:10:01,339 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.460 "HTTP/2 200 OK"
+2025-02-08 23:10:01,895 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.461 "HTTP/2 200 OK"
+2025-02-08 23:10:02,460 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.463 "HTTP/2 200 OK"
+2025-02-08 23:10:03,018 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.464 "HTTP/2 200 OK"
+2025-02-08 23:10:03,577 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.466 "HTTP/2 200 OK"
+2025-02-08 23:10:04,148 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.467 "HTTP/2 200 OK"
+2025-02-08 23:10:04,711 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.468 "HTTP/2 200 OK"
+2025-02-08 23:10:05,272 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.469 "HTTP/2 200 OK"
+2025-02-08 23:10:05,581 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.470 "HTTP/2 200 OK"
+2025-02-08 23:10:06,143 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.471 "HTTP/2 200 OK"
+2025-02-08 23:10:06,725 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.472 "HTTP/2 200 OK"
+2025-02-08 23:10:07,277 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.473 "HTTP/2 200 OK"
+2025-02-08 23:10:07,845 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.474 "HTTP/2 200 OK"
+2025-02-08 23:10:08,412 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.475 "HTTP/2 200 OK"
+2025-02-08 23:10:08,970 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.476 "HTTP/2 200 OK"
+2025-02-08 23:10:09,525 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.477 "HTTP/2 200 OK"
+2025-02-08 23:10:10,110 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.478 "HTTP/2 200 OK"
+2025-02-08 23:10:10,678 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.479 "HTTP/2 200 OK"
+2025-02-08 23:10:11,242 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1987 "HTTP/2 200 OK"
+2025-02-08 23:10:11,810 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1988 "HTTP/2 200 OK"
+2025-02-08 23:10:12,379 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1996 "HTTP/2 200 OK"
+2025-02-08 23:10:12,944 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1984 "HTTP/2 200 OK"
+2025-02-08 23:10:13,504 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1997 "HTTP/2 200 OK"
+2025-02-08 23:10:14,074 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1985 "HTTP/2 200 OK"
+2025-02-08 23:10:14,640 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1995 "HTTP/2 200 OK"
+2025-02-08 23:10:15,211 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1986 "HTTP/2 200 OK"
+2025-02-08 23:10:15,767 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.480 "HTTP/2 200 OK"
+2025-02-08 23:10:16,337 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1975 "HTTP/2 200 OK"
+2025-02-08 23:10:16,900 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1976 "HTTP/2 200 OK"
+2025-02-08 23:10:17,469 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1977 "HTTP/2 200 OK"
+2025-02-08 23:10:18,012 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1978 "HTTP/2 200 OK"
+2025-02-08 23:10:18,581 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1979 "HTTP/2 200 OK"
+2025-02-08 23:10:18,883 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1980 "HTTP/2 200 OK"
+2025-02-08 23:10:19,705 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1982 "HTTP/2 200 OK"
+2025-02-08 23:10:20,268 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1983 "HTTP/2 200 OK"
+2025-02-08 23:10:20,837 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1989 "HTTP/2 200 OK"
+2025-02-08 23:10:21,397 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1990 "HTTP/2 200 OK"
+2025-02-08 23:10:21,960 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1991 "HTTP/2 200 OK"
+2025-02-08 23:10:22,514 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1992 "HTTP/2 200 OK"
+2025-02-08 23:10:23,069 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1993 "HTTP/2 200 OK"
+2025-02-08 23:10:23,649 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2007 "HTTP/2 200 OK"
+2025-02-08 23:10:24,230 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1994 "HTTP/2 200 OK"
+2025-02-08 23:10:24,867 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1998 "HTTP/2 200 OK"
+2025-02-08 23:10:25,433 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1999 "HTTP/2 200 OK"
+2025-02-08 23:10:26,012 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2000 "HTTP/2 200 OK"
+2025-02-08 23:10:26,334 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2001 "HTTP/2 200 OK"
+2025-02-08 23:10:26,897 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2002 "HTTP/2 200 OK"
+2025-02-08 23:10:27,471 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2003 "HTTP/2 200 OK"
+2025-02-08 23:10:28,044 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2011 "HTTP/2 200 OK"
+2025-02-08 23:10:28,370 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2004 "HTTP/2 200 OK"
+2025-02-08 23:10:29,163 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2005 "HTTP/2 200 OK"
+2025-02-08 23:10:29,476 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2006 "HTTP/2 200 OK"
+2025-02-08 23:10:29,574 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:10:29,731 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:10:29,732 - __main__ - INFO - Memory usage: 245.85 MB
+2025-02-08 23:10:30,008 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:10:30,294 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2008 "HTTP/2 200 OK"
+2025-02-08 23:10:30,849 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2009 "HTTP/2 200 OK"
+2025-02-08 23:10:31,421 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2010 "HTTP/2 200 OK"
+2025-02-08 23:10:31,990 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2012 "HTTP/2 200 OK"
+2025-02-08 23:10:32,553 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2013 "HTTP/2 200 OK"
+2025-02-08 23:10:33,106 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2014 "HTTP/2 200 OK"
+2025-02-08 23:10:33,666 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2015 "HTTP/2 200 OK"
+2025-02-08 23:10:34,226 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2016 "HTTP/2 200 OK"
+2025-02-08 23:10:34,763 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2017 "HTTP/2 200 OK"
+2025-02-08 23:10:35,323 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2029 "HTTP/2 200 OK"
+2025-02-08 23:10:35,324 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:10:35,325 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:10:35,325 - __main__ - INFO - Memory usage: 245.85 MB
+2025-02-08 23:10:35,608 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:10:35,877 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2018 "HTTP/2 200 OK"
+2025-02-08 23:10:36,453 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2019 "HTTP/2 200 OK"
+2025-02-08 23:10:36,974 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:10:36,975 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:10:36,976 - __main__ - INFO - Memory usage: 245.85 MB
+2025-02-08 23:10:37,018 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2020 "HTTP/2 200 OK"
+2025-02-08 23:10:37,244 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:10:37,547 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/client_data?select=embedding&client_id=eq.7 "HTTP/2 200 OK"
+2025-02-08 23:10:37,814 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2021 "HTTP/2 200 OK"
+2025-02-08 23:10:38,239 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/podcasts?select=%2A&client_id=eq.7 "HTTP/2 200 OK"
+2025-02-08 23:10:38,787 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2051 "HTTP/2 200 OK"
+2025-02-08 23:10:39,574 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2022 "HTTP/2 200 OK"
+2025-02-08 23:10:40,140 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2023 "HTTP/2 200 OK"
+2025-02-08 23:10:40,201 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.547 "HTTP/2 200 OK"
+2025-02-08 23:10:40,710 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2046 "HTTP/2 200 OK"
+2025-02-08 23:10:41,274 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.580 "HTTP/2 200 OK"
+2025-02-08 23:10:41,293 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2024 "HTTP/2 200 OK"
+2025-02-08 23:10:41,843 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1759 "HTTP/2 200 OK"
+2025-02-08 23:10:41,877 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2025 "HTTP/2 200 OK"
+2025-02-08 23:10:42,437 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1761 "HTTP/2 200 OK"
+2025-02-08 23:10:42,438 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2026 "HTTP/2 200 OK"
+2025-02-08 23:10:42,991 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1760 "HTTP/2 200 OK"
+2025-02-08 23:10:43,017 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2032 "HTTP/2 200 OK"
+2025-02-08 23:10:43,589 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.506 "HTTP/2 200 OK"
+2025-02-08 23:10:43,590 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2027 "HTTP/2 200 OK"
+2025-02-08 23:10:43,906 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2028 "HTTP/2 200 OK"
+2025-02-08 23:10:44,177 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.481 "HTTP/2 200 OK"
+2025-02-08 23:10:44,448 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2030 "HTTP/2 200 OK"
+2025-02-08 23:10:45,003 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.482 "HTTP/2 200 OK"
+2025-02-08 23:10:45,027 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2031 "HTTP/2 200 OK"
+2025-02-08 23:10:45,568 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.483 "HTTP/2 200 OK"
+2025-02-08 23:10:46,135 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2033 "HTTP/2 200 OK"
+2025-02-08 23:10:46,164 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.484 "HTTP/2 200 OK"
+2025-02-08 23:10:46,731 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2034 "HTTP/2 200 OK"
+2025-02-08 23:10:46,751 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.485 "HTTP/2 200 OK"
+2025-02-08 23:10:47,305 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2035 "HTTP/2 200 OK"
+2025-02-08 23:10:47,331 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.486 "HTTP/2 200 OK"
+2025-02-08 23:10:47,879 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2036 "HTTP/2 200 OK"
+2025-02-08 23:10:47,887 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.487 "HTTP/2 200 OK"
+2025-02-08 23:10:48,481 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2037 "HTTP/2 200 OK"
+2025-02-08 23:10:48,481 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.488 "HTTP/2 200 OK"
+2025-02-08 23:10:49,064 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.489 "HTTP/2 200 OK"
+2025-02-08 23:10:49,079 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2038 "HTTP/2 200 OK"
+2025-02-08 23:10:49,627 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.490 "HTTP/2 200 OK"
+2025-02-08 23:10:49,650 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2039 "HTTP/2 200 OK"
+2025-02-08 23:10:50,217 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2040 "HTTP/2 200 OK"
+2025-02-08 23:10:50,218 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.491 "HTTP/2 200 OK"
+2025-02-08 23:10:50,819 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.492 "HTTP/2 200 OK"
+2025-02-08 23:10:50,822 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2041 "HTTP/2 200 OK"
+2025-02-08 23:10:51,374 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.493 "HTTP/2 200 OK"
+2025-02-08 23:10:51,393 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2042 "HTTP/2 200 OK"
+2025-02-08 23:10:51,953 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.494 "HTTP/2 200 OK"
+2025-02-08 23:10:51,977 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2043 "HTTP/2 200 OK"
+2025-02-08 23:10:52,521 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.495 "HTTP/2 200 OK"
+2025-02-08 23:10:52,551 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2044 "HTTP/2 200 OK"
+2025-02-08 23:10:53,123 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2045 "HTTP/2 200 OK"
+2025-02-08 23:10:53,124 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.496 "HTTP/2 200 OK"
+2025-02-08 23:10:53,691 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2047 "HTTP/2 200 OK"
+2025-02-08 23:10:53,692 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.497 "HTTP/2 200 OK"
+2025-02-08 23:10:54,269 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2048 "HTTP/2 200 OK"
+2025-02-08 23:10:54,284 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.507 "HTTP/2 200 OK"
+2025-02-08 23:10:54,848 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2049 "HTTP/2 200 OK"
+2025-02-08 23:10:54,848 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.498 "HTTP/2 200 OK"
+2025-02-08 23:10:55,418 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2050 "HTTP/2 200 OK"
+2025-02-08 23:10:55,441 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.499 "HTTP/2 200 OK"
+2025-02-08 23:10:55,724 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2052 "HTTP/2 200 OK"
+2025-02-08 23:10:56,012 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.500 "HTTP/2 200 OK"
+2025-02-08 23:10:56,580 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2053 "HTTP/2 200 OK"
+2025-02-08 23:10:56,604 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.501 "HTTP/2 200 OK"
+2025-02-08 23:10:57,166 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2054 "HTTP/2 200 OK"
+2025-02-08 23:10:57,192 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.502 "HTTP/2 200 OK"
+2025-02-08 23:10:57,532 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2055 "HTTP/2 200 OK"
+2025-02-08 23:10:57,795 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.503 "HTTP/2 200 OK"
+2025-02-08 23:10:58,403 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.504 "HTTP/2 200 OK"
+2025-02-08 23:10:58,403 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2056 "HTTP/2 200 OK"
+2025-02-08 23:10:58,983 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.2057 "HTTP/2 200 OK"
+2025-02-08 23:10:58,998 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.505 "HTTP/2 200 OK"
+2025-02-08 23:10:59,605 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.508 "HTTP/2 200 OK"
+2025-02-08 23:11:00,175 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.509 "HTTP/2 200 OK"
+2025-02-08 23:11:00,741 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.510 "HTTP/2 200 OK"
+2025-02-08 23:11:01,281 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.511 "HTTP/2 200 OK"
+2025-02-08 23:11:01,851 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.512 "HTTP/2 200 OK"
+2025-02-08 23:11:02,408 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.513 "HTTP/2 200 OK"
+2025-02-08 23:11:02,962 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.514 "HTTP/2 200 OK"
+2025-02-08 23:11:03,518 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.517 "HTTP/2 200 OK"
+2025-02-08 23:11:04,107 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.515 "HTTP/2 200 OK"
+2025-02-08 23:11:04,687 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.516 "HTTP/2 200 OK"
+2025-02-08 23:11:05,254 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.518 "HTTP/2 200 OK"
+2025-02-08 23:11:05,814 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.519 "HTTP/2 200 OK"
+2025-02-08 23:11:06,370 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.520 "HTTP/2 200 OK"
+2025-02-08 23:11:06,917 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.521 "HTTP/2 200 OK"
+2025-02-08 23:11:07,473 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.522 "HTTP/2 200 OK"
+2025-02-08 23:11:08,042 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.523 "HTTP/2 200 OK"
+2025-02-08 23:11:08,628 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.524 "HTTP/2 200 OK"
+2025-02-08 23:11:09,197 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.525 "HTTP/2 200 OK"
+2025-02-08 23:11:09,748 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.526 "HTTP/2 200 OK"
+2025-02-08 23:11:10,052 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.527 "HTTP/2 200 OK"
+2025-02-08 23:11:10,580 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.528 "HTTP/2 200 OK"
+2025-02-08 23:11:11,154 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.529 "HTTP/2 200 OK"
+2025-02-08 23:11:11,727 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.534 "HTTP/2 200 OK"
+2025-02-08 23:11:12,300 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.530 "HTTP/2 200 OK"
+2025-02-08 23:11:12,876 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.531 "HTTP/2 200 OK"
+2025-02-08 23:11:13,466 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.532 "HTTP/2 200 OK"
+2025-02-08 23:11:14,039 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.533 "HTTP/2 200 OK"
+2025-02-08 23:11:14,617 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.535 "HTTP/2 200 OK"
+2025-02-08 23:11:15,178 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.536 "HTTP/2 200 OK"
+2025-02-08 23:11:15,757 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.537 "HTTP/2 200 OK"
+2025-02-08 23:11:16,342 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.545 "HTTP/2 200 OK"
+2025-02-08 23:11:16,889 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.538 "HTTP/2 200 OK"
+2025-02-08 23:11:17,455 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.539 "HTTP/2 200 OK"
+2025-02-08 23:11:18,037 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.540 "HTTP/2 200 OK"
+2025-02-08 23:11:18,629 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.541 "HTTP/2 200 OK"
+2025-02-08 23:11:19,201 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.542 "HTTP/2 200 OK"
+2025-02-08 23:11:19,788 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.543 "HTTP/2 200 OK"
+2025-02-08 23:11:20,353 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.544 "HTTP/2 200 OK"
+2025-02-08 23:11:20,896 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.546 "HTTP/2 200 OK"
+2025-02-08 23:11:21,460 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.548 "HTTP/2 200 OK"
+2025-02-08 23:11:21,772 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.549 "HTTP/2 200 OK"
+2025-02-08 23:11:22,322 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.550 "HTTP/2 200 OK"
+2025-02-08 23:11:22,910 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.551 "HTTP/2 200 OK"
+2025-02-08 23:11:23,501 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.552 "HTTP/2 200 OK"
+2025-02-08 23:11:24,058 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.553 "HTTP/2 200 OK"
+2025-02-08 23:11:24,630 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.554 "HTTP/2 200 OK"
+2025-02-08 23:11:24,954 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.555 "HTTP/2 200 OK"
+2025-02-08 23:11:25,522 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.556 "HTTP/2 200 OK"
+2025-02-08 23:11:25,834 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.557 "HTTP/2 200 OK"
+2025-02-08 23:11:26,146 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.558 "HTTP/2 200 OK"
+2025-02-08 23:11:26,701 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.559 "HTTP/2 200 OK"
+2025-02-08 23:11:27,274 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.581 "HTTP/2 200 OK"
+2025-02-08 23:11:27,837 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.584 "HTTP/2 200 OK"
+2025-02-08 23:11:28,414 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.560 "HTTP/2 200 OK"
+2025-02-08 23:11:28,954 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.561 "HTTP/2 200 OK"
+2025-02-08 23:11:29,544 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.562 "HTTP/2 200 OK"
+2025-02-08 23:11:30,108 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.563 "HTTP/2 200 OK"
+2025-02-08 23:11:30,673 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.564 "HTTP/2 200 OK"
+2025-02-08 23:11:31,216 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.565 "HTTP/2 200 OK"
+2025-02-08 23:11:31,798 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.566 "HTTP/2 200 OK"
+2025-02-08 23:11:32,370 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.573 "HTTP/2 200 OK"
+2025-02-08 23:11:32,930 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.567 "HTTP/2 200 OK"
+2025-02-08 23:11:33,243 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.568 "HTTP/2 200 OK"
+2025-02-08 23:11:34,053 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.569 "HTTP/2 200 OK"
+2025-02-08 23:11:34,610 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.570 "HTTP/2 200 OK"
+2025-02-08 23:11:35,180 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.571 "HTTP/2 200 OK"
+2025-02-08 23:11:35,504 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.572 "HTTP/2 200 OK"
+2025-02-08 23:11:36,328 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.576 "HTTP/2 200 OK"
+2025-02-08 23:11:36,905 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.574 "HTTP/2 200 OK"
+2025-02-08 23:11:37,465 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.575 "HTTP/2 200 OK"
+2025-02-08 23:11:38,036 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.577 "HTTP/2 200 OK"
+2025-02-08 23:11:38,611 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.578 "HTTP/2 200 OK"
+2025-02-08 23:11:39,159 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.579 "HTTP/2 200 OK"
+2025-02-08 23:11:39,727 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.582 "HTTP/2 200 OK"
+2025-02-08 23:11:40,281 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.583 "HTTP/2 200 OK"
+2025-02-08 23:11:40,847 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.585 "HTTP/2 200 OK"
+2025-02-08 23:11:41,401 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.586 "HTTP/2 200 OK"
+2025-02-08 23:11:41,988 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.587 "HTTP/2 200 OK"
+2025-02-08 23:11:42,546 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.588 "HTTP/2 200 OK"
+2025-02-08 23:11:43,104 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.589 "HTTP/2 200 OK"
+2025-02-08 23:11:43,683 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.590 "HTTP/2 200 OK"
+2025-02-08 23:11:44,245 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.591 "HTTP/2 200 OK"
+2025-02-08 23:11:44,809 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.592 "HTTP/2 200 OK"
+2025-02-08 23:11:45,368 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.593 "HTTP/2 200 OK"
+2025-02-08 23:11:45,953 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.595 "HTTP/2 200 OK"
+2025-02-08 23:11:46,623 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.596 "HTTP/2 200 OK"
+2025-02-08 23:11:47,207 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.597 "HTTP/2 200 OK"
+2025-02-08 23:11:47,774 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.598 "HTTP/2 200 OK"
+2025-02-08 23:11:48,365 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.599 "HTTP/2 200 OK"
+2025-02-08 23:11:48,949 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.600 "HTTP/2 200 OK"
+2025-02-08 23:11:49,532 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.601 "HTTP/2 200 OK"
+2025-02-08 23:11:50,105 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.602 "HTTP/2 200 OK"
+2025-02-08 23:11:50,678 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.603 "HTTP/2 200 OK"
+2025-02-08 23:11:51,248 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.604 "HTTP/2 200 OK"
+2025-02-08 23:11:51,797 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.605 "HTTP/2 200 OK"
+2025-02-08 23:11:52,374 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.606 "HTTP/2 200 OK"
+2025-02-08 23:11:52,679 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.607 "HTTP/2 200 OK"
+2025-02-08 23:11:53,466 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.608 "HTTP/2 200 OK"
+2025-02-08 23:11:54,030 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.609 "HTTP/2 200 OK"
+2025-02-08 23:11:54,601 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.610 "HTTP/2 200 OK"
+2025-02-08 23:11:55,187 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.611 "HTTP/2 200 OK"
+2025-02-08 23:11:55,770 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1762 "HTTP/2 200 OK"
+2025-02-08 23:11:56,341 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1763 "HTTP/2 200 OK"
+2025-02-08 23:11:56,916 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1764 "HTTP/2 200 OK"
+2025-02-08 23:11:57,469 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1192 "HTTP/2 200 OK"
+2025-02-08 23:11:58,074 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1396 "HTTP/2 200 OK"
+2025-02-08 23:11:58,375 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1389 "HTTP/2 200 OK"
+2025-02-08 23:11:59,176 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1390 "HTTP/2 200 OK"
+2025-02-08 23:11:59,757 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1391 "HTTP/2 200 OK"
+2025-02-08 23:12:00,323 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1392 "HTTP/2 200 OK"
+2025-02-08 23:12:00,876 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1393 "HTTP/2 200 OK"
+2025-02-08 23:12:01,429 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1394 "HTTP/2 200 OK"
+2025-02-08 23:12:01,733 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1395 "HTTP/2 200 OK"
+2025-02-08 23:12:02,545 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1747 "HTTP/2 200 OK"
+2025-02-08 23:12:03,102 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1739 "HTTP/2 200 OK"
+2025-02-08 23:12:03,662 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1732 "HTTP/2 200 OK"
+2025-02-08 23:12:04,234 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1737 "HTTP/2 200 OK"
+2025-02-08 23:12:04,812 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1733 "HTTP/2 200 OK"
+2025-02-08 23:12:05,378 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1741 "HTTP/2 200 OK"
+2025-02-08 23:12:05,921 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1734 "HTTP/2 200 OK"
+2025-02-08 23:12:06,219 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1735 "HTTP/2 200 OK"
+2025-02-08 23:12:06,780 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1736 "HTTP/2 200 OK"
+2025-02-08 23:12:07,344 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1740 "HTTP/2 200 OK"
+2025-02-08 23:12:07,898 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1746 "HTTP/2 200 OK"
+2025-02-08 23:12:08,470 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1738 "HTTP/2 200 OK"
+2025-02-08 23:12:09,042 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1753 "HTTP/2 200 OK"
+2025-02-08 23:12:09,597 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1742 "HTTP/2 200 OK"
+2025-02-08 23:12:10,178 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1743 "HTTP/2 200 OK"
+2025-02-08 23:12:10,726 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1744 "HTTP/2 200 OK"
+2025-02-08 23:12:11,282 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1745 "HTTP/2 200 OK"
+2025-02-08 23:12:11,848 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1748 "HTTP/2 200 OK"
+2025-02-08 23:12:12,157 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1749 "HTTP/2 200 OK"
+2025-02-08 23:12:12,739 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1750 "HTTP/2 200 OK"
+2025-02-08 23:12:13,051 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1751 "HTTP/2 200 OK"
+2025-02-08 23:12:13,628 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1752 "HTTP/2 200 OK"
+2025-02-08 23:12:13,937 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1754 "HTTP/2 200 OK"
+2025-02-08 23:12:14,498 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1755 "HTTP/2 200 OK"
+2025-02-08 23:12:15,069 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1756 "HTTP/2 200 OK"
+2025-02-08 23:12:15,622 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1757 "HTTP/2 200 OK"
+2025-02-08 23:12:16,177 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1758 "HTTP/2 200 OK"
+2025-02-08 23:12:16,786 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1765 "HTTP/2 200 OK"
+2025-02-08 23:12:17,087 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1766 "HTTP/2 200 OK"
+2025-02-08 23:12:17,378 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1767 "HTTP/2 200 OK"
+2025-02-08 23:12:17,949 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1768 "HTTP/2 200 OK"
+2025-02-08 23:12:18,505 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1769 "HTTP/2 200 OK"
+2025-02-08 23:12:19,060 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1778 "HTTP/2 200 OK"
+2025-02-08 23:12:19,627 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1770 "HTTP/2 200 OK"
+2025-02-08 23:12:20,204 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1771 "HTTP/2 200 OK"
+2025-02-08 23:12:20,775 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1772 "HTTP/2 200 OK"
+2025-02-08 23:12:21,085 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1775 "HTTP/2 200 OK"
+2025-02-08 23:12:21,905 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1773 "HTTP/2 200 OK"
+2025-02-08 23:12:22,464 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1774 "HTTP/2 200 OK"
+2025-02-08 23:12:23,030 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1776 "HTTP/2 200 OK"
+2025-02-08 23:12:23,615 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1777 "HTTP/2 200 OK"
+2025-02-08 23:12:24,168 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1779 "HTTP/2 200 OK"
+2025-02-08 23:12:24,748 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1781 "HTTP/2 200 OK"
+2025-02-08 23:12:25,316 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1782 "HTTP/2 200 OK"
+2025-02-08 23:12:25,888 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1783 "HTTP/2 200 OK"
+2025-02-08 23:12:26,192 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1784 "HTTP/2 200 OK"
+2025-02-08 23:12:26,758 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1785 "HTTP/2 200 OK"
+2025-02-08 23:12:27,320 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1786 "HTTP/2 200 OK"
+2025-02-08 23:12:27,630 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1789 "HTTP/2 200 OK"
+2025-02-08 23:12:28,199 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1787 "HTTP/2 200 OK"
+2025-02-08 23:12:28,758 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=embedding&podcast_id=eq.1788 "HTTP/2 200 OK"
+2025-02-08 23:13:39,235 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:13:39,237 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:13:39,237 - __main__ - INFO - Memory usage: 250.71 MB
+2025-02-08 23:13:40,068 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:13:51,626 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2025-02-08 23:13:51,628 - __main__ - INFO - Successfully connected to Supabase
+2025-02-08 23:13:51,628 - __main__ - INFO - Memory usage: 250.84 MB
+2025-02-08 23:13:52,440 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"

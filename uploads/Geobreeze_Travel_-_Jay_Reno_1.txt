@@ -1,0 +1,192 @@
+Speaker 1 (00:00):
+Everything is completely free. Our approach here is we think that, again, we're really focused on the points beginner and the points Beginner is not used to paying for something like this. The points beginner is using Google Flights or is using Kayak, and obviously they're not paying for any of those search tools. And so on the one hand, our approach is if these people are not used to paying, why would they pay? They'll probably churn and wouldn't use the tool, which will limit the number of people who will actually come into the Point Hunt ecosystem. And the other is if points beginners don't really know the value of points or they're just starting out, they don't know how powerful a tool like this actually is. And there are other folks who provide similar style tools that do charge or that do Gate. And in our approaches there are some great tools, but for the points beginner, they're really not necessarily going to pay for something they don't know the value of. 
+
+Speaker 2 (01:02):
+Hey, there points people. You just heard a clip from Jay Reno from Point Hound. Point Hound is a free site that educates points beginners on how to earn and redeem their points for flights. Their mission as a company is to make travel more accessible for the masses. In this episode, expect to hear about how Point Hound can help people effectively redeem their credit card points for flights. Upcoming features to Point Hound that you can look forward to in the near future and so much more. Also, I recommend watching this episode on the Geo Breeze Travel YouTube channel since Jay will also be demoing some of the different features of Point Hound on the screen. If you are ready to earn some points for your next flight, consider the Chase Sapphire preferred card. This card is often the most recommended card for people just getting into points and miles. 
+
+Speaker 2 (01:53):
+Remember, if you decide to apply for the Chase Sapphire preferred card or any other card, never, ever, ever apply directly through Google, always use a friend or creator's referral link whenever possible. And if you are interested in supporting this show when you apply for your next card, check out Geo Breeze travel.com/cards. And if you're not sure what card is right for you, I offer free credit card consultations@geobreezetravel.com slash consultations. And we have links to the Chase Sapphire preferred card and the free consultation form for you as well. Check out the show notes for all of the links and now on with the show. 
+
+Speaker 2 (02:34):
+Welcome to the Geo Breeze Travel podcast, a show for anyone wanting to level up their travel hacking lifestyle. I'm your host, Julia Menez. I'm a travel hacker coach, speaker Filipino American ENTJ, who loves solid travel gear and using shortcuts on spreadsheets. On this show, I'm on a mission to bring you travel hackers from all walks of life to help you level up your travel hacking game. We dive into credit cards, miles points, strategy, mindset, and the behind how to travel the world for next to no cost. So let's get hacking. If you're optimizing your life, one of the best things that you can do is avoid decision fatigue. It's that tired feeling that you get after making tons of tiny little decisions every day like what's where or what to eat. But you don't need to add the decision fatigue of where to search for flight deals to all that. 
+
+Speaker 2 (03:25):
+Instead, check out a newsletter. Subscription service like Thrifty Traveler, they curate dozens of different flight deals, saving you the time and energy from having to do the searching by yourself. And each deal can save you hundreds or potentially thousands of dollars off of the ticket cost. They've sent deals with flights to Bali for $700 off of the usual price or flights to Manila for $400 off and even points deals like business class from Denver to Istanbul for 65,000 points each way. Another tip to avoid decision fatigue, don't spend days on a decision that should only take a few minutes. Sign up today@thriftytraveler.com and use the code GO 10, that's GEO one zero to save $10 off of the annual subscription. Thank you to Thrifty Traveler for partnering with this episode of the Geo Breeze Travel podcast. Hey Jay, welcome to the Geo Breeze Travel podcast. 
+
+Speaker 3 (04:22):
+Hey Julia, thanks for having me on. 
+
+Speaker 2 (04:24):
+I'm so excited to have you on. I think a lot of the audience's favorite episodes are whenever somebody codes an app or website that helps the points community, especially if it's free. So we're going to talk about Points Hound today, but before we get into all of that, tell us a little bit about you and how did you get into Points and Miles? 
+
+Speaker 1 (04:43):
+I've been an entrepreneur for a long time and maybe for the last 10 plus years. The last company I started, it was a furniture rental company called Feather. We ended up going through a startup accelerator called Y Combinator and we were building this kind of furniture rental business for millennials and Gen Z where most people are moving a lot between cities and within cities and don't want to buy and own a bunch of their furniture moving all the time. And we ended up building this company. It really took off. We raised some 75 million of venture capital from the first investors in Amazon and Google, and then we ended up selling the business in 2022. But as we were building this company for the first few years, we ended up putting a lot of our furniture spend. We were designing and manufacturing furniture and in the early days we were buying furniture. 
+
+Speaker 1 (05:37):
+We ended up putting a lot of that furniture spend on credit cards. I was an absolute novice at this point though, so I had no idea what I was doing. I put most of it on an MX Platinum because back then the MX Platinum was such a great card where it's this big shiny silver thing that has lots of benefits and perks to it. But as it turns out, I found out that I was getting one X points on everything. I got into the world of points and miles through my own naivete, I had earned almost 20 million points in the process of just kind of flailing around and using whatever cards seemed to make sense from Delta status at that time. So for me, diamond Medallion status was the goal and I had no idea that I could have probably been earning 50 million points if I was even remotely optimizing. It didn't necessarily take me a few years to get to this point, but a few years of flailing around and learning and then really getting into it was how I got into the world of points and miles. I'd say at this point I've definitely learned enough to be quite dangerous, but yeah, it would've been really funny having me on here five or six years ago. 
+
+Speaker 2 (06:53):
+We have a lot of clients who start off that way where they're like, well, we have a business. There's a lot of spend. I have 50 million miles, what do I do? And I'm like, oh, this is going to be awesome. We're going to help you optimize. And then we find out it is 50 million delta miles or something where it's so hard to optimize those and I'm like, oh man, we could be helping you earn so much more in travel with Chase or Amex or Capital One or built or something else. But this happens a lot from what I've seen. 
+
+Speaker 1 (07:21):
+Yeah, I definitely made one major mistake at one point I transferred like 8 million miles from Amex to Delta because Delta was my airline and I'm still working through that glut of Delta miles where really the best way best and probably only way to use your Delta miles if you're trying to get a decent deal is between Europe and Asia or just any place where Delta does not. So yeah, I made that hilarious mistake in the early days and I'm still working my way through it. 
+
+Speaker 2 (07:56):
+It's funny because a lot of people think, oh, if you tend to fly a little bit nicer domestically in the us, Delta is your airline. They have nicer lounges, they have nicer first class products. Generally pretty good service out of all of the US airlines. I think they're still probably the best. But I was doing product review for a startup company where they're like, we want to partner with different airlines. We want to target more high income, high expenses, high net worth people, where should we transfer points to? We're thinking Delta. And I was like, please do not out of all of the airlines, please don't choose Delta, choose Alaska, choose American Airlines, choose Hyatt, choose not Delta. And they were so surprised because a lot of people just think, oh, if you're spending a lot of money, you probably have Delta and Medallion status. You could be one of those people flying back and forth between Atlanta and New York every week. But once you get deeper into points and miles, you find out that's not the way and you can get those flights a lot cheaper on Virgin Atlantic or something else. 
+
+Speaker 1 (08:55):
+Exactly that same Delta flight as it turns out. 
+
+Speaker 2 (08:58):
+So how did this all turn into Points Hound? Did you keep the furniture rental for a while and then decide you didn't want to do that anymore or how did that kind of transpire? 
+
+Speaker 1 (09:08):
+We ended up selling Feather in 2022, the furniture rental company. I ended up taking a bunch of time off, did a bunch of traveling, of course, didn't pay for it and used a lot of my points and I ended up joining a venture capital firm called 6 4 5 Ventures where I was leading investing in consumer businesses. We were writing one to 10 million checks in a lot of early stage businesses and for me, my focus was really on consumer businesses that were changing behavior. And from there I ended up just really leaning into one of my passions, which is travel. A lot of people would probably put that in their list of things that they like to do, but I really enjoy traveling not just for the sake of going from A to B, but to be in a new place, meeting people understanding new cultures. And so our mission at Point Hound is actually to make travel more accessible and that was where we came from and realized that there are a lot of problems in the world and from our perspective, a lot of those stem from a lack of empathy and a lack of understanding how other people live. 
+
+Speaker 1 (10:15):
+That could be racism, sexism, just like general ignorance in the world comes from our perspective from a lack of understanding who other people are and how other people live. And so if we can get the 60 plus percent of people who don't even have passports to get passports and to see a different country, our opinion is that we can make a pretty healthy dent in some of these larger world issues. 
+
+Speaker 2 (10:41):
+Yeah, I think that's definitely a big point of what makes travel so great is it just helps you to see how other people live. And I know a lot of people are like, there's so much of the world who can't even afford passports or anything like that, but even just shows like this where we showcase other people and how other people travel because even in the world of points and miles, most of us are decently well off at least well enough to get credit cards and take a couple trips every year, which puts us in the top probably 2% of the planet. But even within that a small niche, there's always so many different ways to look at the world of points and miles and how to play the game. Yeah, I think always just connecting with people who have a different viewpoint than you do is a great way to learn more about the world. Is that how Point Town came about? 
+
+Speaker 1 (11:30):
+It came from my passion of travel and then also wanting to build something that has a greater impact in the world. Traveling does have a bit of a negative environmental impact, at least today given that we're using jet fuel to get place to place. But I do think the societal impacts of getting people from out of where are currently comfortable or what they know into places that might teach them something about themselves, about the way that other people live is worth that. So yeah, ultimately this was one of the main reasons we really wanted to build this business is, and this may be an unpopular opinion, but we don't totally agree that credit cards are, or at least credit cards that earn transferable points are only for the top percentage or 10% or 20% of people in say the US where you can get these cards. 
+
+Speaker 1 (12:30):
+But it really comes down to a lack of almost financial literacy and understanding of how credit works. So you don't have to have a lot of income to qualify for a say Chase Sapphire Preferred or a other kind of entry level travel rewards cards. What you do need to have is a good credit score and can you build a good credit score without making a ton of money? Generally, yes. And can you qualify for a travel rewards card without a high income? Generally, yes. Just need to know some of the basics in how to get there and to get a good credit score, like paying off your credit card every month or call it every week if you're a little bit worried about it and just making sure you're not overspending over what you actually have in the bank. So there are a bunch of these little kind of elements that I think if taught properly or if I guess understood by the masses could lead to more people being able to travel the world and ultimately for free or close to it using points and miles. Generally traveling internationally, it's quite expensive for the average person. And so our hope is that by allowing people to have these cards and to spend on them appropriately, they can earn points and therefore be able to travel to places for free that they may not otherwise be able to get to. 
+
+Speaker 2 (13:57):
+Yeah. Let's kind of dive into Point Hound. If you can pull up your screen share for a demo and let's talk about how people might be able to use your tool to facilitate even more travel throughout the world using their points and miles. Does it have a financial education piece built in as well? 
+
+Speaker 1 (14:13):
+It has a points 1 0 1 section where we're here to try and help simplify the world of credit card points to teach you a little bit about how this works. This is of course our version one where we go through a very simple educational element. Why is redeeming your points for flights the best value? We're working on a few other educational elements that I'll be really excited to share in the coming months. But yeah, this is kind of where we start today. We also have this kind of points dashboard. So if you take our onboarding quiz, which I'm logged in right now, so it would normally say get started here, but that will allow you to tell us a bit about you, about what you spend on roughly each month and a few other questions. And then it allows us to pull up a user dashboard for you that will help you optimize the right how you should be spending on a given card versus the other cards you may already have in your wallet. 
+
+Speaker 1 (15:13):
+And then you can turn off any of those if you wanted to turn one of them off. And then it also recommends additional cards based on if would like to open up new cards or maximize the points that you're earning, we can suggest a few cards that would be beneficial to you personally to be able to earn more points or miles. That's like the points dashboard and how we help people earn points, which is generally less fun, less sexy. What people like to do is redeem their points, where could you go? Where could you travel? And so we have two search functionalities on our site. One is you can search from A to B on a given date or set of dates and then run that search. So San Francisco to Madrid on this is today happy to be flying to Madrid today. So this is probably why this is still hold up here. 
+
+Speaker 1 (16:05):
+And then I think what's even more interesting than this particular search if you have some level of flexibility and want to try and get a really great deal is using our top flight deals search so you can plug in your home airport. In this case I'm in the Bay area, so I'll plug in San Francisco and whatever date range you want, you could look into the future. You could say just look the next, let's look at the next 20 days or so, 25 days and run a search for all of those days at once. And I'm going to select business class because let's see what we can get. 
+
+Speaker 2 (16:40):
+Does this cover all airlines or are there any notable ones that this tends to search and does not search? 
+
+Speaker 1 (16:47):
+Yeah, we search about 16 different airline programs right now, and so those airline programs of course will cover a lot of different airlines per program. So we're covering about 150 airlines in our searches. I'd say notable ones we don't cover today would be Singapore Airlines. We don't search Singapore Airlines, but you can get results for Singapore Airlines. And there are a few other programs we don't currently search, JetBlue or Southwest, a few of the American carriers that don't have as good of award availability or as good deals on those flights. But if any user wants to request programs to search, we definitely take those requests pretty seriously. When you run a search, we basically pull up all of the places you could go from your home airport in the given range. We ran that search, I think it took maybe eight seconds and we have some four or 5,000 results. 
+
+Speaker 1 (17:45):
+So what you can do is say, you know what? I actually want to a little bit more picky. I want to go to Europe, so let's only search Europe and I know that you can search over here and say, alright, let's filter this from low to high instead of just searching day in a row. You can search low to high. You'll tend to obviously find a lot of UK based flights in that lowest range with higher taxes and fees. So you could either filter out the UK and then just look at anywhere else you could go. And yeah, we make this super simple to just kind of filter around and find deals that you want. So say maybe you wanted to go to the France in the state range, here are all the ways that you can get to France and here are all the potential flights that you could book. 
+
+Speaker 2 (18:35):
+So this works well if you are saying, I want to get from my home airport to anywhere, here's my kid's spring break or something. It works really well for that use case. Does it work if you're like, I want to go from my home airport to France whenever is the cheapest throughout the year, does it have that kind of functionality? 
+
+Speaker 1 (18:53):
+We allow you to search for up to a month at a time, so it wouldn't be like there's a lot of data to pull over say an entire year, but what you can do is you could run the search over whatever the months are that you think are important to you. So maybe you're like, all right, next February I want to go on a vacation with my family, not totally sure where or when yet, or maybe I am and I could just filter down by the location that I care about. So right now we're searching the entire month of February from your home airport and then you can filter it down from there. 
+
+Speaker 2 (19:28):
+Would it work if you're trying to get home where you're like, I need to get a flight from anywhere in Europe back to San Francisco and I need to get home on this date. Does it handle that type of use case? 
+
+Speaker 1 (19:39):
+Yeah, so this tool is very powerful for being able to search a lot of different flights and programs and over a very wide date range. But what you will have to do is throw in say the airport that you're flying back from and say, okay, in whatever September on these three days or whatever you were looking at and you wanted to fly in business, you could run that search from this airport and then filter it by, I only want to search for flights that are going to fly to California, so in this case, I want to go back to San Francisco and here's how I can do that. If you did want to see other airports, you would have to put in those other airports and run the same search, but it generally doesn't take very long. It takes like three or four seconds to run that entire search, even over a long date range. 
+
+Speaker 1 (20:29):
+If you were to say, let's look over these two weeks and run that exact same search, one to three four, it takes like four seconds to run the entire search. So it can be a little bit annoying to not be able to throw in a bunch of different airport codes here, but it doesn't take too long to run the search. And we designed it specifically this way because our user is very much a points beginner and someone who's thinking, I'm in Europe and just show me the best way that I can run a positioning flight home, may not know what a positioning flight is, right? Our demo and the folks that we're really targeting are these points beginners who are thinking a little bit more local from their home airport or from the airport that they're going to be flying back from. So we didn't want to make it a little bit too complicated. In this case, we thought running another search wouldn't be too hard, especially because our search is so fast, but we're always up for feedback and we're constantly iterating the product. Yeah, happy to take any 
+
+Speaker 2 (21:33):
+Feedback. Awesome. Let's talk about that top Flight Deals tab. What does that do? 
+
+Speaker 1 (21:39):
+Oh, this is the top flight deals tab. We've been in it the whole time. 
+
+Speaker 2 (21:43):
+How does that differ from just general search? You have a search tab and a top flight deals tab? 
+
+Speaker 1 (21:47):
+Yeah, it's funny, we basically have two types of search. One is we're going to run this search live right now for you, so say San Francisco to Madrid. We're going to go run this search on 15, 16 different programs. You're going to see these things populating in real time, and these will be the real time results. So anything you see here, you can reliably say that these are accurate because we just ran this search. So we pull in flights from all different airlines, paginate it all, and it's done. So this is like if you know that you need to go from A to B on a given date and you want to just run that search, we can run that search here for you. And you get of course all of these results which are very, very accurate and fresh, 
+
+Speaker 2 (22:40):
+And this lets you filter down to the different credit card programs or airlines that you want as well. And it even highlights which ones are the best deal. Is that correct? Because it's saying that United Flight is $14,000 and you would get 7 cents per point, or that Air France one is $8,000 and you'd get 3.70 cents per point. Is that what it's doing? Or it's only able to do that sometimes because with those American Airlines flights that it's showing it's fewer points, but it's not saying it's a good redemption. How would we interpret that? 
+
+Speaker 1 (23:14):
+What we end up doing is we actually run searches too for the retail price so that the user can see whether this is a good deal or not in points or dollars. What we ended up doing here is making a decision to say if we put a green check mark next to it, we say what the cents per point is. If it's greater than 2 cents per point, we tend to put a green check and say, okay, this is doable. You could book this with points. If it's one that's a yellow check mark, which we'll probably see somewhere in here, you could go either way with this. And then if it's a red, then we're basically saying it probably doesn't make sense to use points to book this. So we do pull that retail price in to make it easy for the user to see what would the cost be if I were to just book this flight in dollars, 
+
+Speaker 2 (24:00):
+What if it's blank? In those American Airlines examples, 
+
+Speaker 1 (24:04):
+The blanks are kind of funny. So when we do run these searches, sometimes we don't get matches for certain flights that happen to have multiple stops and longer layovers. We would, in this case, that just means we didn't find the retail price of this flight, so we're not calculating the cents per point for you on this flight. 
+
+Speaker 2 (24:27):
+If that happens with someone, I would suggest just going to Google flights and checking that retail value because the points required are a lot lower for those American Airlines flights. If you have American Airlines miles or this still says build will transfer there, unfortunately ending their partnership. But yeah, if you have American Airlines Miles, that'd be great. Can you scroll up to the filters a little bit more? 
+
+Speaker 3 (24:48):
+Yep. 
+
+Speaker 2 (24:49):
+So this lets you filter by program as well as different airlines and the number of stops as well. If you're like, I don't really want to take two stops, you can filter by all of those and you're pulling in quite a few different programs here, which is great. 
+
+Speaker 1 (25:04):
+Yep, exactly. Yep. And you could say, Hey, I only have an Amex card, so only show me results where I can transfer from my amex. Or you could say, just filter the cards or the results to match the cards that I have. So if you've taken our onboarding flow and you've told us which cards you have, then we can automatically update the results for you to only see what you can actually find in book. 
+
+Speaker 2 (25:30):
+How much does this cost to use for the different features are part of it pay gated? 
+
+Speaker 1 (25:34):
+Everything is completely free. Our approach here is we think that, again, we're really focused on the points beginner and the points Beginner is not used to paying for something like this. The points beginner is using Google Flights or is using Kayak, and obviously they're not paying for any of those search tools. And so on the one hand, our approach is if these people are not used to paying, why would they pay? Right? They'll probably churn and wouldn't use the tool, which will limit the number of people who will actually come into the Point Hunt ecosystem. And the other is if points beginners don't really know the value of points or they're just starting out, they don't know how powerful a tool like this actually is. And there are other folks who provide similar style tools that do charge or that do Gate, and in our approaches there are some great tools, but for the points beginner, they're really not necessarily going to pay for something they don't know the value of. And so that's where we really want to make this available and affordable to everybody using it. 
+
+Speaker 2 (26:43):
+How do you guys make money? 
+
+Speaker 1 (26:44):
+Yeah, we make money. So today we make money not from our users directly, but when our users sign up for credit cards through our recommendations for them, that's how we make money. We make money on the affiliate fees that the credit card issuers pay out to us. 
+
+Speaker 2 (27:01):
+That's a pretty common model. Are there any other features that we've missed that you want to point out to everyone listening today? 
+
+Speaker 1 (27:10):
+Yeah, I don't know. I think our top flight deals searches is very powerful for running wide searches from your home airport or from any airport really, and it allows you to find the sweet spots and have that cream rise to the top. So this is what I tend to suggest a lot of people use in their searches when they have some level of flexibility. 
+
+Speaker 2 (27:34):
+So you mentioned that on the search tab, if somebody is searching from airport A to airport B, it's searching live in real time, so those results are going to be super accurate from what's currently shown on the airline websites. What about the top flight deals tab? Are those results pulled in real time or is it more like stored results where you're pulling it in every couple of hours so it could be slightly more out of date if you're looking for top flight deals? 
+
+Speaker 1 (28:00):
+Yeah, it's a great question. So yeah, our live search here and our search page runs everything in real time and pulls that data in real time. The top flight deals page has all sorts of cache data. So we are running these searches all the time in the background and we pull all of those results in and these are all availabilities that you can book, but when you click into one, let's just click into this JFK to Dublin one as an example. This is a business class flight, JFK to Dublin, 45,000 points. Looks like it's with Alaska. We last updated this, so this was from 32 minutes ago is the last time we ran the search. So it's relatively fresh. We keep it as fresh as we can without going too overboard. But yeah, these will have some level of delay and you can always click in and see them right here. 
+
+Speaker 2 (28:53):
+Since these are usually beginners who are searching for these flights, if they click on book, do they know what to search for on Alaska? Is it going to be pre-populated? What happens if someone's like, I like this deal for 45,000 points? 
+
+Speaker 1 (29:06):
+Yeah, yeah, so it's nice if you had a built card or Marriott Bonvoy card and you wanted to know how to actually go through and book that flight, you could click book and it'll teach you what to do along the way. So we'll tell you, okay, this is generally an instant transfer. You can click get started, you need to create an account, click here, it'll take you to go create an account on their account page if you don't already have one. And then you can go through the rest of this user flow where you can confirm that your flight is available. So yeah, if you hit search, some of these will actually pre-populate and run a search, but some of the airlines don't allow that. So it looks like in this case, when you click search for flights on Alaska, it doesn't include and then some other airlines it does, which is just a kind of really nice feature. But yeah, you would need to then go in and say, okay, cool. Let me plug in the parameters for that flight 
+
+Speaker 2 (29:59):
+Flight. I really like that it says this where you should confirm that the flight exists on Alaska Airlines because I'm sure some people just start moving points over, but it's phantom availability. It happens even after you confirm flight sometimes with various airlines. I just ran into this with Virgin Atlantic for a couple of people, but I like that it says the step of make sure you physically see the flights first and that it has directions for all of that. Is it built in for every airline where it'll say, here's exactly what to click on? 
+
+Speaker 1 (30:29):
+Yes, this is designed and built for every single airline or every program that we search. This is tailored to each of those. So in this case, yeah, before you transfer points, let's make sure the flight is available and each of these steps in the flow is not only for the airline specifically, but even for the card that would be transferred from to that program. 
+
+Speaker 2 (30:52):
+Does this also take into account transfer bonuses? If somebody happens to have Amex points and Capital One points and you find a flight deal on Virgin Atlantic and there's currently a transfer bonus on Amex, let's say, would this tool notify them, Hey, you should use your Amex points instead of your Capital One points? 
+
+Speaker 1 (31:12):
+Yeah, it actually does, and that's I think one of the beauties of this tool, especially for that points beginner, but I guess for really anyone is that, so you mentioned Virgin. Here's a flight where there are actually transfer bonuses that are live. So if you were to transfer from say, city or built to Virgin Atlantic who are not running transfer bonuses, it would be 10,000 points to book that flight. If you were to transfer from Amex or Chase who are both offering transfer bonuses between their programs and Virgin Atlantic, you can book that flight for a lot less and we surface those up to the top and tell you these are our point hound picks. So if you do happen to have these programs, this would be a good time to use those points to transfer to Virgin Atlantic to book this flight. 
+
+Speaker 2 (31:59):
+What new features are you looking to add in to Point Hound in the future that people can look forward to? 
+
+Speaker 1 (32:04):
+We are working on a few pretty large projects that we're excited to share more about when we're ready to announce them without giving them away. We are very focused on, and I've said this a few times probably, but we are very focused on what we call points beginner, which is in our estimate probably like 97 or 98% of the population. And so how do we define the points beginner? That's really like anyone who has not used their points by transferring them to an airline and getting good to great value on them. So given that is really our target demo, yeah, we're realizing that there's a level of education that's necessary in order to get people to a base level understanding of how points work. And so that's one of the areas that we're focusing on now. 
+
+Speaker 2 (32:57):
+Perfect. If people want to check out the site or connect with you for any follow-up questions, what's the best way to connect with you and your team? 
+
+Speaker 1 (33:05):
+Yeah, you can find us on point hound.com. You can join our Discord server, it's Point Hound or send any of us an email team@pointhound.com in case you have any feedback for us or questions or praise. We take it all. Anytime you want to connect, we're available. We're also on Instagram, TikTok, et cetera. All the handles are Point Hound, so easy to find us. 
+
+Speaker 2 (33:29):
+Perfect. Well, thank you again so much, Jay, for coming onto the show today and doing a quick demo of what Point, how can do and for building this amazing free tool for people who are looking to get a little bit deeper into the world of points and miles. 
+
+Speaker 3 (33:42):
+You bet. Yeah, thanks for having me on. Nice to meet you, Julia. 
+
+Speaker 2 (33:51):
+Thank you so much for listening to today's episode of the Geo Breeze Travel podcast. If any of the cards mentioned in today's episode piqued your interest, please check out the links in the show notes for more information on any of the cards. Also, if you apply for a card using the links on that page, I may receive a commission too. So please and thank you. Ps I hear the links work better in Internet Explorer or Safari, and sometimes the credit card applications tend to glitch out in Chrome. Additionally, it would mean the world to me. If you could subscribe to this podcast, leave a five star review and share it with a friend. And if you would like to make even more travel hacking friends, please sign up for the Patreon to access our monthly Masterclass Hangouts. We dive deep into a particular points program each month, and you'll get to ask all of your travel hacking questions and enjoy being around other people who enjoy points and miles just as much as you and I do. If you would like an invite to the next one, head over to Geo Breeze travel.com/hangouts to sign up to be on the invite list. Take care and happy travels.
+

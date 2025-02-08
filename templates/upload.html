@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast Matcher - Upload and Match</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .dragover {
+            background-color: #e2e8f0;
+            border-color: #4299e1;
+        }
+        .success-message {
+            transform: translateX(-50%) translateY(-100%);
+        }
+        .success-message.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .filter-badge {
+            display: inline-block;
+            background-color: #e2e8f0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            margin: 0.25rem;
+            font-size: 0.875rem;
+            color: #4a5568;
+        }
+        .stats-card {
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .export-button {
+            transition: all 0.2s ease;
+        }
+        .export-button:active {
+            transform: translateY(1px);
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3498db;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto my-10 px-4">
+        <!-- Client Data Upload Section -->
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h2 class="text-2xl font-bold mb-4">Upload Client Data</h2>
+            
+            <form id="clientForm" action="/upload_client" method="post" enctype="multipart/form-data" class="space-y-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="clientSelect">Select a client:</label>
+                    <div class="relative">
+                        <select id="clientSelect" name="client_id" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded leading-tight focus:outline-none focus:ring focus:border-blue-500" onchange="toggleClientInput()">
+                            <option value="">Select a client</option>
+                            {% for client in clients %}
+                            <option value="{{ client.id }}">{{ client.name }}</option>
+                            {% endfor %}
+                            <option value="new">Add New Client</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="newClientInput" class="mb-4 hidden">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="newClientNameInput">New Client Name:</label>
+                    <input type="text" id="newClientNameInput" name="newClientNameInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-500">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Upload Client Files</label>
+                    <input type="file" id="clientFiles" name="files" multiple class="hidden" onchange="handleFileSelect(event)">
+                    <div class="upload-area bg-gray-200 hover:bg-gray-300 border-2 border-dashed border-gray-400 rounded-lg p-6 cursor-pointer" 
+                         ondragover="handleDrag(event)" 
+                         ondragleave="handleDragLeave(event)" 
+                         ondrop="handleFileDrop(event)"
+                         onclick="document.getElementById('clientFiles').click()">
+                        <div class="text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
+                            </svg>
+                            <p class="mt-1">Drag and drop files here or click to browse</p>
+                            <p class="text-sm text-gray-500">Supported formats: .txt, .docx, .html</p>
+                        </div>
+                    </div>
+                    <div id="selectedClientFiles" class="mt-2 space-y-2"></div>
+                </div>
+
+                <div id="clientUploadProgress" class="hidden mt-4">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">Uploading: <span>0%</span></p>
+                </div>
+
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150">
+                    Upload Client Files
+                </button>
+            </form>
+        </div>
+
+        <!-- Podcast Data Upload Section -->
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h2 class="text-2xl font-bold mb-4">Upload Podcast Data</h2>
+            
+            <form id="podcastForm" action="/upload_podcast" method="post" enctype="multipart/form-data" class="space-y-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="podcastClientSelect">Select a client:</label>
+                    <div class="relative">
+                        <select id="podcastClientSelect" name="client_id" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded leading-tight focus:outline-none focus:ring focus:border-blue-500">
+                            <option value="">Select a client</option>
+                            {% for client in clients %}
+                            <option value="{{ client.id }}">{{ client.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Upload Podcast CSV</label>
+                    <input type="file" id="podcastFile" name="file" class="hidden" accept=".csv" onchange="handlePodcastSelect(event)">
+                    <div class="upload-area bg-gray-200 hover:bg-gray-300 border-2 border-dashed border-gray-400 rounded-lg p-6 cursor-pointer"
+                         ondragover="handleDrag(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handlePodcastDrop(event)"
+                         onclick="document.getElementById('podcastFile').click()">
+                        <div class="text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
+                            </svg>
+                            <p class="mt-1">Drag and drop CSV file here or click to browse</p>
+                        </div>
+                    </div>
+                    <div id="selectedPodcastFile" class="mt-2"></div>
+                </div>
+
+                <div id="podcastUploadProgress" class="hidden mt-4">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">Uploading: <span>0%</span></p>
+                </div>
+
+                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150">
+                    Upload Podcast Data
+                </button>
+            </form>
+        </div>
+
+        <!-- Podcast Matching Section -->
+        <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+            <h2 class="text-2xl font-bold mb-4">Podcast Matching</h2>
+            
+            <div class="space-y-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="matchingClientSelect">Select a client:</label>
+                    <div class="relative">
+                        <select id="matchingClientSelect" class="block appearance-none w-full bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded leading-tight focus:outline-none focus:ring focus:border-blue-500">
+                            <option value="">Select a client</option>
+                            {% for client in clients %}
+                            <option value="{{ client.id }}">{{ client.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Section -->
+                <div id="podcastStats" class="mb-6">
+                    <!-- Stats will be populated by JavaScript -->
+                </div>
+
+                <div class="filter-section mb-4">
+                    <h3 class="text-lg font-semibold mb-2">Listen Score Range</h3>
+                    
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-1/4">
+                            <label class="block text-sm mb-1">Minimum Score</label>
+                            <select id="minScore" class="w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring focus:border-blue-500">
+                            </select>
+                        </div>
+                        
+                        <div class="text-center text-gray-600">to</div>
+                        
+                        <div class="w-1/4">
+                            <label class="block text-sm mb-1">Maximum Score</label>
+                            <select id="maxScore" class="w-full p-2 border rounded border-gray-300 focus:outline-none focus:ring focus:border-blue-500">
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 mb-4">
+                        <input type="checkbox" 
+                               id="includeBlank" 
+                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                        <label for="includeBlank" class="text-sm text-gray-600">
+                            Include blank Listen Scores
+                        </label>
+                    </div>
+
+                    <div id="activeFilters" class="mt-2">
+                        <!-- Active filters will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="matchPodcasts()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150">
+                        Match Podcasts
+                    </button>
+                    
+                    <button onclick="exportMatches()" class="export-button bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150">
+                        Export Results
+                    </button>
+                </div>
+
+                <div id="matchingResults" class="mt-4 overflow-x-auto">
+                    <!-- Results will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg transition-all duration-500 opacity-0 z-50 success-message">
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/upload.js"></script>
+    <script src="/static/js/matching.js"></script>
+</body>
+</html>

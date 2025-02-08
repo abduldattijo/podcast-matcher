@@ -1,0 +1,57 @@
+2024-11-26 20:13:04,515 - __main__ - ERROR - OpenAI API key not found in environment variables
+2024-11-26 20:13:04,516 - __main__ - ERROR - Error creating Flask app: OpenAI API key not configured
+2024-11-26 20:13:04,516 - __main__ - ERROR - Error initializing application: OpenAI API key not configured
+2024-11-26 20:13:04,516 - __main__ - CRITICAL - Failed to initialize application: OpenAI API key not configured
+2024-11-26 20:14:20,640 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A&limit=1 "HTTP/2 200 OK"
+2024-11-26 20:14:20,646 - __main__ - INFO - Successfully connected to Supabase
+2024-11-26 20:14:20,648 - __main__ - INFO - Application initialized successfully
+2024-11-26 20:14:20,666 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:10000
+ * Running on http://172.17.129.5:10000
+2024-11-26 20:14:20,667 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2024-11-26 20:14:31,708 - __main__ - INFO - Incoming request: GET /
+2024-11-26 20:14:31,708 - __main__ - INFO - Response status: 302 FOUND
+2024-11-26 20:14:31,710 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:14:31] "[32mGET / HTTP/1.1[0m" 302 -
+2024-11-26 20:14:31,753 - __main__ - INFO - Incoming request: GET /upload_combined
+2024-11-26 20:14:32,161 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2024-11-26 20:14:32,166 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:14:32,167 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:14:32] "GET /upload_combined HTTP/1.1" 200 -
+2024-11-26 20:14:32,222 - __main__ - INFO - Incoming request: GET /static/js/upload.js
+2024-11-26 20:14:32,225 - __main__ - INFO - Incoming request: GET /static/js/matching.js
+2024-11-26 20:14:32,285 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:14:32,286 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:14:32] "GET /static/js/matching.js HTTP/1.1" 200 -
+2024-11-26 20:14:32,310 - __main__ - INFO - Response status: 304 NOT MODIFIED
+2024-11-26 20:14:32,311 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:14:32] "[36mGET /static/js/upload.js HTTP/1.1[0m" 304 -
+2024-11-26 20:14:44,374 - __main__ - INFO - Incoming request: GET /upload_combined
+2024-11-26 20:14:44,945 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2024-11-26 20:14:44,949 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:14:44,950 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:14:44] "GET /upload_combined HTTP/1.1" 200 -
+2024-11-26 20:14:45,009 - __main__ - INFO - Incoming request: GET /static/js/upload.js
+2024-11-26 20:14:45,011 - __main__ - INFO - Incoming request: GET /static/js/matching.js
+2024-11-26 20:14:45,012 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:14:45,013 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:14:45,013 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:14:45] "GET /static/js/upload.js HTTP/1.1" 200 -
+2024-11-26 20:14:45,014 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:14:45] "GET /static/js/matching.js HTTP/1.1" 200 -
+2024-11-26 20:16:02,622 - __main__ - INFO - Incoming request: GET /get_podcast_stats
+2024-11-26 20:16:03,033 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/podcasts?select=listen_score%2Cglobal_rank%2Clast_updated&client_id=eq.8 "HTTP/2 200 OK"
+2024-11-26 20:16:03,035 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:16:03,036 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:16:03] "GET /get_podcast_stats?client_id=8 HTTP/1.1" 200 -
+2024-11-26 20:16:16,632 - __main__ - INFO - Incoming request: GET /match_podcasts
+2024-11-26 20:16:17,437 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/client_data?select=%2A&client_id=eq.8 "HTTP/2 200 OK"
+2024-11-26 20:16:17,915 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/podcasts?select=%2A&client_id=eq.8 "HTTP/2 200 OK"
+2024-11-26 20:16:18,485 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/episodes?select=%2A&podcast_id=in.%2816%2C17%2C18%2C19%2C20%29 "HTTP/2 200 OK"
+2024-11-26 20:16:18,817 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:16:18,818 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:16:18] "GET /match_podcasts?client_id=8&min_score=20&max_score=100&include_blank=false HTTP/1.1" 200 -
+2024-11-26 20:17:55,252 - __main__ - INFO - Incoming request: POST /upload_client
+2024-11-26 20:17:57,173 - httpx - INFO - HTTP Request: POST https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/client_data "HTTP/2 201 Created"
+2024-11-26 20:17:57,176 - __main__ - INFO - Response status: 302 FOUND
+2024-11-26 20:17:57,178 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:17:57] "[32mPOST /upload_client HTTP/1.1[0m" 302 -
+2024-11-26 20:17:57,188 - __main__ - INFO - Incoming request: GET /upload_combined
+2024-11-26 20:17:57,326 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2024-11-26 20:17:57,328 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:17:57,329 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:17:57] "GET /upload_combined HTTP/1.1" 200 -
+2024-11-26 20:17:57,341 - __main__ - INFO - Incoming request: GET /get_clients
+2024-11-26 20:17:57,508 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2024-11-26 20:17:57,510 - __main__ - INFO - Response status: 200 OK
+2024-11-26 20:17:57,512 - werkzeug - INFO - 127.0.0.1 - - [26/Nov/2024 20:17:57] "GET /get_clients HTTP/1.1" 200 -
