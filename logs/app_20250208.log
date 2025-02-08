@@ -1021,3 +1021,4 @@ jinja2.exceptions.TemplateNotFound: error.html
 2025-02-08 23:13:51,628 - __main__ - INFO - Successfully connected to Supabase
 2025-02-08 23:13:51,628 - __main__ - INFO - Memory usage: 250.84 MB
 2025-02-08 23:13:52,440 - httpx - INFO - HTTP Request: GET https://xhiqvdyqaaowxptzupdf.supabase.co/rest/v1/clients?select=%2A "HTTP/2 200 OK"
+2025-02-08 23:41:09,324 - __main__ - ERROR - Error initializing application: OpenAI API key not configured

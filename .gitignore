@@ -1,4 +1,4 @@
 # Environment variables
-.env
+#.env
 logs/
 __pycache__/
